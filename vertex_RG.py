@@ -184,8 +184,8 @@ elif (XType == "Mom"):
             # qData=8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)-qData
             # print qData.shape, len(ExtMomBin)
             # print qData
-            ErrorPlot(ax, ExtMomBin, qData,
-                      ColorList[i], 's', "Loop {0}, Chan {1}".format(order, ChanName[chan]))
+            # ErrorPlot(ax, ExtMomBin, qData,
+                    #   ColorList[i], 's', "Loop {0}, Chan {1}".format(order, ChanName[chan]))
 
     for chan in Channel:
         if(chan == 1):
@@ -199,7 +199,7 @@ elif (XType == "Mom"):
         # qData0 = 8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)-qData0
         # qData=8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)-qData
         ErrorPlot(ax, ExtMomBin, qData,
-                  ColorList[0], 'o', "Chan {1}".format(0, ChanName[chan]))
+                  ColorList[chan], 'o', "Chan {1}".format(0, ChanName[chan]))
 
     x = np.arange(0, 3.0, 0.001)
     y = x*0.0+Bubble
