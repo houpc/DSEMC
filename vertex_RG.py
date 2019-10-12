@@ -112,7 +112,7 @@ for order in Order:
 
         for f in files:
             if re.match(FileName, f):
-                print "Loading ", f
+                print("Loading ", f)
                 with open(folder+f, "r") as file:
                     line0 = file.readline()
                     Step = int(line0.split(":")[-1])/1000000
