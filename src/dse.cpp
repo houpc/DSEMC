@@ -47,6 +47,8 @@ ver4 verDiag::Build(array<momentum, MaxMomNum> &loopMom, int LoopNum,
     // LegK = {&(*LoopMom)[1], &(*LoopMom)[1], &(*LoopMom)[2], &(*LoopMom)[2]};
   }
 
+  // cout<<"LegK \n"<<LegK[0]<<endl<<LegK[1]<<endl<<LegK[2]<<endl<<LegK[3]<<endl;
+
   if (Type == PARQUET)
     return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, true, false, false);
   else
@@ -208,9 +210,9 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
     if (HasS)
       // Bubble.LegK[S] = {Bubble.LegK[T][INL], NextMom(), NextMom(),
       // NextMom()};
-      // Bubble.LegK[S] = {NextMom(), NextMom(), NextMom(), NextMom()};
+      Bubble.LegK[S] = {NextMom(), NextMom(), NextMom(), NextMom()};
       // no projection for S channel for now
-      Bubble.LegK[S] = Ver4.LegK;
+      // Bubble.LegK[S] = Ver4.LegK;
   } else
     for (auto &c : Channel)
       Bubble.LegK[c] = Ver4.LegK;

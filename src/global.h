@@ -16,6 +16,7 @@ const bool DEBUGMODE = true;
 // array.h
 ///////////  Global Constants ////////////////////
 // D=2 or D=3
+
 const int D = 3;
 // number of q bins of the external momentum
 const int ExtMomBinSize = 32;
@@ -97,6 +98,7 @@ enum spin { DOWN, UP };
 
 #define FLIPSPIN(x) spin(1 - x)
 // Spin DOWN: 0,  Spin UP:1
+
 
 const int IN = 0;
 const int OUT = 1;

@@ -184,6 +184,7 @@ while True:
             print "{0:6.2f}, {1:10.6f}, {2:10.6f}".format(
                 ExtMomBin[i], qData[i], DataErr[(0, 3)][i])
 
+    print "Step:{0}, TotalStep:{1}".format(Step, TotalStep)
     if Step >= TotalStep:
         print "End of Simulation!"
         sys.exit(0)

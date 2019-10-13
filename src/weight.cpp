@@ -49,6 +49,8 @@ void weight::Initialization() {
           VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::PARQUET);
       LOG_INFO(VerDiag.ToString(Ver4Root[order][c]));
     }
+  
+  // exit(0);
 
   LOG_INFO("Initializating MC variables ...")
   // initialize momentum variables
