@@ -158,7 +158,9 @@ fig, ax = plt.subplots()
 # ax = fig.add_subplot(122)
 
 # plt.subplot(1,2,2)
-ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy', 'y']
+
+MarkerList = ['s','o','v','d','x','^','<','>','*','2','3','4','H','+','D', '.', ',']
+ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy', 'y','lime','fuchsia', 'aqua','sandybrown','slategrey']
 ColorList = ColorList*40
 
 if(XType == "Scale"):
@@ -187,7 +189,7 @@ elif (XType == "Mom"):
             # print qData.shape, len(ExtMomBin)
             # print qData
             # ErrorPlot(ax, ExtMomBin, qData,
-                    #   ColorList[i], 's', "Loop {0}, Chan {1}".format(order, ChanName[chan]))
+                    #   ColorList[order], MarkerList[chan], "Loop {0}, Chan {1}".format(order, ChanName[chan]))
 
     for chan in Channel:
         if(chan == 1):
@@ -200,9 +202,9 @@ elif (XType == "Mom"):
         # qData = np.sum(qData, axis=1)*Beta/kF**2/TauBinSize
         # qData0 = 8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)-qData0
         # qData=8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)-qData
-        print(qData)
+
         ErrorPlot(ax, ExtMomBin, qData,
-                  ColorList[chan], 'o', "Chan {1}".format(0, ChanName[chan]))
+                  ColorList[5+chan], MarkerList[chan], "Chan {1}".format(0, ChanName[chan]))
 
     x = np.arange(0, 3.0, 0.001)
     y = x*0.0+Bubble
