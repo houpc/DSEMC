@@ -38,8 +38,9 @@ for index, eachline in enumerate(inlist):
     os.system("cp {0} {1}".format(execute, homedir))
 
     infilepath = homedir+"/infile"
-    if(os.path.exists(infilepath) != True):
-        os.system("mkdir "+infilepath)
+    if os.path.exists(infilepath):
+        os.system("rm -fr "+infilepath)
+    os.system("mkdir "+infilepath)
     outfilepath = homedir+"/outfile"
     if(os.path.exists(outfilepath) != True):
         os.system("mkdir "+outfilepath)

@@ -36,16 +36,17 @@ ver4 verDiag::Build(array<momentum, MaxMomNum> &loopMom, int LoopNum,
   MomNum = MaxLoopNum;
   LoopMom = &loopMom;
   array<momentum *, 4> LegK;
-  // if (Channel.size() == 1 && Channel[0] == S) {
-  //   LegK = {&(*LoopMom)[1], &(*LoopMom)[2], NextMom(), NextMom()};
-  // } else {
-  //   LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
-  // }
 
   if (Channel.size() == 1) {
-    LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
-    // LegK = {&(*LoopMom)[1], &(*LoopMom)[1], &(*LoopMom)[2], &(*LoopMom)[2]};
-  }
+    if (Channel[0]==dse::S)
+      LegK = {&(*LoopMom)[1], &(*LoopMom)[2], NextMom(), NextMom()};
+    else
+      LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
+  } else
+    ABORT("Root should only have one channel.");
+
+
+  
 
   // cout<<"LegK \n"<<LegK[0]<<endl<<LegK[1]<<endl<<LegK[2]<<endl<<LegK[3]<<endl;
 

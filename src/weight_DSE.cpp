@@ -37,27 +37,17 @@ double weight::Evaluate(int LoopNum, int Channel) {
     if (Channel == dse::S) {
       *Root.LegK[INR] = Var.LoopMom[0] - Var.LoopMom[1];
       *Root.LegK[OUTR] = Var.LoopMom[0] - Var.LoopMom[2];
-      *Root.LegK[OUTL] = Var.LoopMom[0] - *Root.LegK[OUTR];
     } else if (Channel == dse::T) {
       *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
       *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
     } else if (Channel == dse::U) {
       *Root.LegK[OUTL] = Var.LoopMom[2] + Var.LoopMom[0];
       *Root.LegK[OUTR] = Var.LoopMom[1] - Var.LoopMom[0];
+    } else {
+      *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
+      *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
     }
-
-    // cout << "channel: " << Channel << endl;
-    // cout << "Root.LegK[INL]: " << Root.LegK[INL]  << endl;
-    // cout << "Root.LegK[INR]: " << Root.LegK[INR]  << endl;
-    // cout << "Root.LegK[OUTL]: " << Root.LegK[OUTL]  << endl;
-    // cout << "Root.LegK[OUTR]: " << Root.LegK[OUTR]  << endl;
-
-    // cout << "Var.LoopMom[0]: " << &(Var.LoopMom[0])  << endl;
-    // cout << "Var.LoopMom[1]: " << &(Var.LoopMom[1])  << endl;
-    // cout << "Var.LoopMom[2]: " << &(Var.LoopMom[2])  << endl;
-    // cout << "Var.LoopMom[3]: " << &(Var.LoopMom[3])  << endl;
-
-    // cout << endl;
+    
 
 
     Vertex4(Root);
@@ -139,16 +129,11 @@ void weight::ChanUST(dse::ver4 &Ver4) {
         Ratio = Para.Kf / (*LegK0[INR]).norm();
         *bubble.LegK[T][INR] = *LegK0[INR] * Ratio;
         if (DirQ < 1.0 * Para.Kf) {
-          // *bubble.LegK[T][OUTL] = *bubble.LegK[T][INL];
-          // *bubble.LegK[T][OUTR] = *bubble.LegK[T][INR];
-          // double x=
           bubble.ProjFactor[T] = exp(-DirQ * DirQ / 0.1);
           // if (DirQ < EPS)
           //   bubble.ProjFactor[T] = 1.0;
         }
         if (ExQ < 1.0 * Para.Kf) {
-          // *bubble.LegK[U][OUTL] = *bubble.LegK[T][INR];
-          // *bubble.LegK[U][OUTR] = *bubble.LegK[T][INL];
           // if (ExQ < EPS)
           // bubble.ProjFactor[U] = 1.0;
           bubble.ProjFactor[U] = exp(-ExQ * ExQ / 0.1);
@@ -186,7 +171,9 @@ void weight::ChanUST(dse::ver4 &Ver4) {
       //   *bubble.LegK[S][OUTR] = *LegK0[OUTR] * Ratio;
       //   bubble.ProjFactor[S] = 1.0;
       // }
-        double InQ = (*LegK0[INL] + *LegK0[INR]).norm();
+
+      double InQ = (*LegK0[INL] + *LegK0[INR]).norm();
+      // if (InQ < 1.0 * Para.Kf) {
         bubble.ProjFactor[S] = exp(-InQ * InQ / 0.1);
 
         Ratio = Para.Kf / (*LegK0[INL]).norm();
@@ -197,8 +184,7 @@ void weight::ChanUST(dse::ver4 &Ver4) {
         *bubble.LegK[S][OUTL] = *LegK0[OUTL] * Ratio;
         *bubble.LegK[S][OUTR] = *bubble.LegK[S][OUTL] * (-1.0);
 
-          //   if (InQ < 1.0 * Para.Kf) {
-      //   }
+      // }
     }
 
     for (auto &chan : bubble.Channel) {

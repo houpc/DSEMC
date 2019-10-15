@@ -71,9 +71,11 @@ def AngleIntegation(Data, l):
     shape = Data.shape[1:]
     Result = np.zeros(shape)
     for x in range(AngleBinSize):
-        # Result += Data[x, ...] * \
-        #     np.cos(l*AngleBin[x])*2.0*np.pi/AngleBinSize
-        Result += Data[x, ...]*2.0/AngleBinSize
+        if l==1:
+            # Result += Data[x]*np.cos(l*AngleBin[x])/AngleBinSize
+            Result += Data[x]*AngleBin[x]/AngleBinSize
+        elif l==0:
+            Result += Data[x, ...]*2.0/AngleBinSize
     return Result/2.0
     # return Result
 
@@ -198,6 +200,7 @@ elif (XType == "Mom"):
         # qData = np.sum(qData, axis=1)*Beta/kF**2/TauBinSize
         # qData0 = 8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)-qData0
         # qData=8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)-qData
+        print(qData)
         ErrorPlot(ax, ExtMomBin, qData,
                   ColorList[chan], 'o', "Chan {1}".format(0, ChanName[chan]))
 
