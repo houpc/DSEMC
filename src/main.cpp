@@ -82,7 +82,7 @@ void InitPara() {
   Para.MaxExtMom *= Kf;
 
   // scale all energy with E_F
-  Para.Beta /= Para.Ef;
+  Para.Beta /= Para.Ef;        // KT = EF/Beta
   Para.UVScale = 2.0 * Para.Kf;
   Para.UVCoupling = 1.0 * Para.Ef;
 

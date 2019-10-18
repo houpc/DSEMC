@@ -15,8 +15,8 @@ XType = "Mom"
 # XType = "Angle"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
-Channel = [0, 1, 2, 3]
-# Channel = [3]
+# Channel = [0, 1, 2, 3]
+Channel = [3]
 ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 # 0: total, 1: order 1, ...
 # Order = [0, 1, 2, 3]
@@ -71,11 +71,16 @@ def AngleIntegation(Data, l):
     shape = Data.shape[1:]
     Result = np.zeros(shape)
     for x in range(AngleBinSize):
+        theta = np.arccos(AngleBin[x])
         if l==1:
             # Result += Data[x]*np.cos(l*AngleBin[x])/AngleBinSize
-            Result += Data[x]*AngleBin[x]/AngleBinSize
+            Result += Data[x]*AngleBin[x]*( 2*l+1 )/AngleBinSize
         elif l==0:
             Result += Data[x, ...]*2.0/AngleBinSize
+        elif l==2:
+            Result += Data[x]*( 3*np.cos(2*theta)+1 )*( 2*l+1 )/(4*AngleBinSize)
+        elif l==3:
+            Result += Data[x]*( 5*np.cos(3*theta)+3*np.cos(theta) )*( 2*l+1 )/(8*AngleBinSize)
     return Result/2.0
     # return Result
 
@@ -143,7 +148,7 @@ for order in Order:
         DataWithAngle[(order, chan)] = Data0
 
         # average the angle distribution
-        Data[(order, chan)] = AngleIntegation(Data0, 0)
+        Data[(order, chan)] = AngleIntegation(Data0, 1)
 
 
 def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):
@@ -153,11 +158,14 @@ def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):
 
 w = 1-0.429
 
-fig, ax = plt.subplots()
+# fig, ax = plt.subplots()
 # ax=fig.add_axes()
 # ax = fig.add_subplot(122)
 
 # plt.subplot(1,2,2)
+
+ax = plt.subplot(1,2,1)
+bx = plt.subplot(1,2,2)
 
 MarkerList = ['s','o','v','d','x','^','<','>','*','2','3','4','H','+','D', '.', ',']
 ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy', 'y','lime','fuchsia', 'aqua','sandybrown','slategrey']
@@ -204,7 +212,13 @@ elif (XType == "Mom"):
         # qData=8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)-qData
 
         ErrorPlot(ax, ExtMomBin, qData,
-                  ColorList[5+chan], MarkerList[chan], "Chan {1}".format(0, ChanName[chan]))
+                  ColorList[5+chan], MarkerList[0], "Chan {1}".format(0, ChanName[chan]))
+        if chan==3:
+            bxx = np.log(ExtMomBin[1:])  # because ExtMomBin[0] = 0
+            bx.set_xlim(min(bxx),max(bxx))
+            bx.set_xlabel("$log(q/k_F)$", size=size)
+            ErrorPlot(bx, bxx, qData[1:],
+                  'r', MarkerList[0], "Chan {1}".format(0, ChanName[chan]))
 
     x = np.arange(0, 3.0, 0.001)
     y = x*0.0+Bubble
@@ -216,7 +230,7 @@ elif (XType == "Mom"):
     yphy = 8.0*np.pi/(x*x*kF*kF+Lambda+y*8.0*np.pi)
 
     # ax.plot(x, yphy, 'k-', lw=2, label="physical")
-    ax.plot(x, y0, 'k-', lw=2, label="original")
+    # ax.plot(x, y0, 'k-', lw=2, label="original")
 
     # ax.plot(x, y0*y0*y, 'r-', lw=2, label="wrong")
 
@@ -244,7 +258,7 @@ elif(XType == "Angle"):
 
         x2, y2 = Mirror(np.arccos(AngleBin), AngData[:, 0])
 
-        ErrorPlot(ax, x2, y2, ColorList[chan+1], 's',
+        ErrorPlot(ax, x2, y2, ColorList[chan+1], MarkerList[chan],
                   "q/kF={0}, {1}".format(ExtMomBin[0], ChanName[chan]))
         # ErrorPlot(ax, np.arccos(AngleBin), AngData[:, 0], ColorList[chan+1], 's',
         #           "Q {0}, {1}".format(ExtMomBin[0], ChanName[chan]))
@@ -255,7 +269,7 @@ elif(XType == "Angle"):
     # AngTotal[:, 0] += 8.0*np.pi/Lambda-8.0 * \
     #     np.pi / ((2.0*kF*np.sin(AngHalf))**2+Lambda)
     x2, y2 = Mirror(np.arccos(AngleBin), AngTotal[:, 0])
-    ErrorPlot(ax, x2, y2, ColorList[0], 's',
+    ErrorPlot(ax, x2, y2, ColorList[0], MarkerList[chan],
               "q/kF={0}, Total".format(ExtMomBin[0]))
     # ErrorPlot(ax, np.arccos(AngleBin), AngTotal[:, 0], ColorList[0], 's',
     #           "Q {0}, Total".format(ExtMomBin[0]))

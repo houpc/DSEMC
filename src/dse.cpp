@@ -92,6 +92,7 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
     Ver4 = ChanUST(Ver4, UST, InTL, LoopNum, LoopIndex, false);
 
     // counter diagrams if the vertex is on the right
+
     if (IsFullVer4) {
       if (Ver4.RenormVer4) {
         // ASSERT_ALLWAYS(II.size() == 1,
@@ -108,6 +109,9 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
         Ver4 = ChanUST(Ver4, {T, U, S}, InTL, LoopNum, LoopIndex, true);
       }
     }
+
+
+
   }
 
   Ver4.Weight.resize(Ver4.T.size());
