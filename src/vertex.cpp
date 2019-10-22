@@ -147,10 +147,10 @@ double verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
   double kDiQ = DiQ.norm();
   double kExQ = ExQ.norm();
   if (VerType == 0) {
-    // return -8.0 * PI / (kDiQ * kDiQ + Para.Mass2) +
-    //        8.0 * PI / (kExQ * kExQ + Para.Mass2);
-    return -1.0*(-8.0 * PI / (kDiQ * kDiQ + Para.Mass2) +
-           8.0 * PI / (kExQ * kExQ + Para.Mass2));        
+    return -8.0 * PI / (kDiQ * kDiQ + Para.Mass2) +
+           8.0 * PI / (kExQ * kExQ + Para.Mass2);
+    // return -1.0*(-8.0 * PI / (kDiQ * kDiQ + Para.Mass2) +
+    //        8.0 * PI / (kExQ * kExQ + Para.Mass2));        
     // return 1.0 / Para.Beta;
   } else if (VerType == 1) {
     double EffInt = 0.0;

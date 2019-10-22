@@ -212,7 +212,7 @@ elif (XType == "Mom"):
         # qData=8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)-qData
 
         ErrorPlot(ax, ExtMomBin, qData,
-                  ColorList[5+chan], MarkerList[0], "Chan {1}".format(0, ChanName[chan]))
+                  ColorList[5+chan], MarkerList[chan-3], "Chan {1}".format(0, ChanName[chan]))
         if chan==3:
             bxx = np.log(ExtMomBin[1:])  # because ExtMomBin[0] = 0
             bx.set_xlim(min(bxx),max(bxx))
