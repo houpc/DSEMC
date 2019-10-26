@@ -12,7 +12,7 @@ size = 12
 
 # XType = "Tau"
 XType = "Mom"
-# XType = "Angle"
+XType = "Angle"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
 Channel = [0, 1, 2, 3]
