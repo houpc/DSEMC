@@ -45,10 +45,17 @@ ver4 verDiag::Build(array<momentum, MaxMomNum> &loopMom, int LoopNum,
   } else
     ABORT("Root should only have one channel.");
 
+  // if (Channel.size() == 1 && Channel[0] == S) {
+  //   LegK = {&(*LoopMom)[1], &(*LoopMom)[2], NextMom(), NextMom()};
+  // } else {
+  //   LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
+  // }
 
-  
 
-  // cout<<"LegK \n"<<LegK[0]<<endl<<LegK[1]<<endl<<LegK[2]<<endl<<LegK[3]<<endl;
+  // if (Channel.size() == 1) {
+  //   LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
+  //   // LegK = {&(*LoopMom)[1], &(*LoopMom)[1], &(*LoopMom)[2], &(*LoopMom)[2]};
+  // }
 
   if (Type == PARQUET)
     return Vertex(LegK, 0, LoopNum, 3, Channel, LEFT, true, false, false);
