@@ -12,7 +12,7 @@ size = 12
 
 # XType = "Tau"
 XType = "Mom"
-# XType = "Angle"
+XType = "Angle"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
 Channel = [0, 1, 2, 3]
@@ -250,8 +250,8 @@ elif(XType == "Angle"):
     # AngTotal[:, 0] += 8.0*np.pi/Lambda-8.0 * \
     #     np.pi / ((2.0*kF*np.sin(AngHalf))**2+Lambda)
     x2, y2 = Mirror(np.arccos(AngleBin), AngTotal[:, 0])
-    ErrorPlot(ax, x2, y2, ColorList[0], 's',
-              "q/kF={0}, Total".format(ExtMomBin[0]))
+    # ErrorPlot(ax, x2, y2, ColorList[0], 's',
+            #   "q/kF={0}, Total".format(ExtMomBin[0]))
     # ErrorPlot(ax, np.arccos(AngleBin), AngTotal[:, 0], ColorList[0], 's',
     #           "Q {0}, Total".format(ExtMomBin[0]))
 

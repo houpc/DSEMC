@@ -34,16 +34,16 @@ double weight::Evaluate(int LoopNum, int Channel) {
     //   cout << Root.ID << endl;
     // }
 
-    *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
-    *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
+    // *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
+    // *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
 
-    // if (Channel == dse::S) {
-    //   *Root.LegK[INR] = Var.LoopMom[0] - Var.LoopMom[1];
-    //   *Root.LegK[OUTR] = Var.LoopMom[0] - Var.LoopMom[2];
-    // } else {
-    //   *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
-    //   *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
-    // }
+    if (Channel == dse::S) {
+      *Root.LegK[INR] = Var.LoopMom[0] - Var.LoopMom[1];
+      *Root.LegK[OUTR] = Var.LoopMom[0] - Var.LoopMom[2];
+    } else {
+      *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
+      *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
+    }
 
     Vertex4(Root);
 
@@ -171,16 +171,16 @@ void weight::ChanUST(dse::ver4 &Ver4) {
       //   *bubble.LegK[S][OUTR] = *LegK0[OUTR] * Ratio;
       //   bubble.ProjFactor[S] = 1.0;
       // }
-      //   double InQ = (*LegK0[INL] + *LegK0[INR]).norm();
-      //   if (InQ < 1.0 * Para.Kf) {
-      //     Ratio = Para.Kf / (*LegK0[INL]).norm();
-      //     *bubble.LegK[S][INL] = *LegK0[INL] * Ratio;
-      //     Ratio = Para.Kf / (*LegK0[OUTL]).norm();
-      //     *bubble.LegK[S][OUTL] = *LegK0[OUTL] * Ratio;
-      //     *bubble.LegK[S][INR] = *bubble.LegK[S][INL] * (-1.0);
-      //     *bubble.LegK[S][OUTR] = *bubble.LegK[S][OUTL] * (-1.0);
-      //     bubble.ProjFactor[S] = exp(-InQ * InQ / 0.1);
-      //   }
+        double InQ = (*LegK0[INL] + *LegK0[INR]).norm();
+        if (InQ < 1.0 * Para.Kf) {
+          Ratio = Para.Kf / (*LegK0[INL]).norm();
+          *bubble.LegK[S][INL] = *LegK0[INL] * Ratio;
+          Ratio = Para.Kf / (*LegK0[OUTL]).norm();
+          *bubble.LegK[S][OUTL] = *LegK0[OUTL] * Ratio;
+          *bubble.LegK[S][INR] = *bubble.LegK[S][INL] * (-1.0);
+          *bubble.LegK[S][OUTR] = *bubble.LegK[S][OUTL] * (-1.0);
+          bubble.ProjFactor[S] = exp(-InQ * InQ / 0.1);
+        }
     }
 
     for (auto &chan : bubble.Channel) {
