@@ -15,8 +15,17 @@ XType = "Mom"
 # XType = "Angle"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
-# Channel = [0, 1, 2, 3]
-Channel = [3]
+Channel = [0, 1, 2, 3]
+# Channel = [3]
+
+ITUSPlot = False
+SPlot = False
+if len(Channel)==4:
+    ITUSPlot = True
+if (len(Channel)==1) and (Channel[0]==3):
+    SPlot = True
+
+
 ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 # 0: total, 1: order 1, ...
 # Order = [0, 1, 2, 3]
@@ -164,8 +173,11 @@ w = 1-0.429
 
 # plt.subplot(1,2,2)
 
-ax = plt.subplot(1,2,1)
-bx = plt.subplot(1,2,2)
+if SPlot:
+    ax = plt.subplot(1,2,1)
+    bx = plt.subplot(1,2,2)
+else:
+    ax = plt.subplot(1,1,1)
 
 MarkerList = ['s','o','v','d','x','^','<','>','*','2','3','4','H','+','D', '.', ',']
 ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy', 'y','lime','fuchsia', 'aqua','sandybrown','slategrey']
@@ -213,7 +225,7 @@ elif (XType == "Mom"):
 
         ErrorPlot(ax, ExtMomBin, qData,
                   ColorList[5+chan], MarkerList[chan-3], "Chan {1}".format(0, ChanName[chan]))
-        if chan==3:
+        if SPlot and chan==3:
             bxx = np.log(ExtMomBin[1:])  # because ExtMomBin[0] = 0
             bx.set_xlim(min(bxx),max(bxx))
             bx.set_xlabel("$log(q/k_F)$", size=size)
@@ -230,7 +242,8 @@ elif (XType == "Mom"):
     yphy = 8.0*np.pi/(x*x*kF*kF+Lambda+y*8.0*np.pi)
 
     # ax.plot(x, yphy, 'k-', lw=2, label="physical")
-    # ax.plot(x, y0, 'k-', lw=2, label="original")
+    if ITUSPlot:
+        ax.plot(x, y0, 'k-', lw=2, label="original")
 
     # ax.plot(x, y0*y0*y, 'r-', lw=2, label="wrong")
 
