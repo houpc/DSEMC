@@ -19,7 +19,7 @@ const bool DEBUGMODE = true;
 
 const int D = 3;
 // number of q bins of the external momentum
-const int ExtMomBinSize = 128;
+const int ExtMomBinSize = 32;
 // number of bins for the angle between InL and InR legs
 const int AngBinSize = 128;
 // number of energy scales, only useful in RG approach
@@ -31,6 +31,8 @@ enum selfenergy { BARE, FOCK, DRESSED }; // self energy type
 enum type { GU, GW, RG, PARQUET };
 enum obstype { FREQ, EQUALTIME };
 enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
+
+const bool BareCalc = true;
 
 typedef Vec<double, D> momentum;
 // typedef std::array<double, D> momentum;

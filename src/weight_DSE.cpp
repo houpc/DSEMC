@@ -35,30 +35,33 @@ double weight::Evaluate(int LoopNum, int Channel) {
     // }
 
 
+    if (Channel == dse::S) {
+      *Root.LegK[INR] = Var.LoopMom[0] - Var.LoopMom[1];
+      *Root.LegK[OUTR] = Var.LoopMom[0] - Var.LoopMom[2];
+    } else if (Channel == dse::T) {
+      *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
+      *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
+    } else if (Channel == dse::U) {
+      *Root.LegK[OUTL] = Var.LoopMom[2] + Var.LoopMom[0];
+      *Root.LegK[OUTR] = Var.LoopMom[1] - Var.LoopMom[0];
+      // *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
+      // *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
+    } else {
+      *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
+      *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
+    }
+
+
+
     // if (Channel == dse::S) {
     //   *Root.LegK[INR] = Var.LoopMom[0] - Var.LoopMom[1];
     //   *Root.LegK[OUTR] = Var.LoopMom[0] - Var.LoopMom[2];
-    // } else if (Channel == dse::T) {
-    //   *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
-    //   *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
-    // } else if (Channel == dse::U) {
-    //   *Root.LegK[OUTL] = Var.LoopMom[2] + Var.LoopMom[0];
-    //   *Root.LegK[OUTR] = Var.LoopMom[1] - Var.LoopMom[0];
+
     // } else {
     //   *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
     //   *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
     // }
 
-
-
-    if (Channel == dse::S) {
-      *Root.LegK[INR] = Var.LoopMom[0] - Var.LoopMom[1];
-      *Root.LegK[OUTR] = Var.LoopMom[0] - Var.LoopMom[2];
-
-    } else {
-      *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
-      *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
-    }
 
     Vertex4(Root);
 

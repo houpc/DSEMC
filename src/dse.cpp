@@ -37,19 +37,19 @@ ver4 verDiag::Build(array<momentum, MaxMomNum> &loopMom, int LoopNum,
   LoopMom = &loopMom;
   array<momentum *, 4> LegK;
 
-  if (Channel.size() == 1) {
-    if (Channel[0]==dse::S)
-      LegK = {&(*LoopMom)[1], &(*LoopMom)[2], NextMom(), NextMom()};
-    else
-      LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
-  } else
-    ABORT("Root should only have one channel.");
+  // if (Channel.size() == 1) {
+  //   if (Channel[0]==dse::S)
+  //     LegK = {&(*LoopMom)[1], &(*LoopMom)[2], NextMom(), NextMom()};
+  //   else
+  //     LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
+  // } else
+  //   ABORT("Root should only have one channel.");
 
-  // if (Channel.size() == 1 && Channel[0] == S) {
-  //   LegK = {&(*LoopMom)[1], &(*LoopMom)[2], NextMom(), NextMom()};
-  // } else {
-  //   LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
-  // }
+  if (Channel.size() == 1 && Channel[0] == S) {
+    LegK = {&(*LoopMom)[1], &(*LoopMom)[2], NextMom(), NextMom()};
+  } else {
+    LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
+  }
 
 
   // if (Channel.size() == 1) {
@@ -101,7 +101,7 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
     // counter diagrams if the vertex is on the right
 
     if (IsFullVer4) {
-      if (Ver4.RenormVer4) {
+      if ((!BareCalc) && Ver4.RenormVer4) {
         // ASSERT_ALLWAYS(II.size() == 1,
         //                "Right vertex should contain one I channel!");
         // ASSERT_ALLWAYS(UST.size() == 3,
@@ -110,7 +110,7 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
         Ver4 = ChanUST(Ver4, UST, InTL, LoopNum, LoopIndex, true);
       }
     } else {
-      if (Ver4.RexpandBare) {
+      if ((!BareCalc) && Ver4.RexpandBare) {
         // counter diagrams if the vertex is on the left
         Ver4 = ChanI(Ver4, {I}, InTL, LoopNum, LoopIndex, true);
         Ver4 = ChanUST(Ver4, {T, U, S}, InTL, LoopNum, LoopIndex, true);

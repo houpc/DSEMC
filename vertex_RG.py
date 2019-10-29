@@ -12,11 +12,11 @@ size = 12
 
 # XType = "Tau"
 XType = "Mom"
-XType = "Angle"
+# XType = "Angle"
 OrderByOrder = False
 # 0: I, 1: T, 2: U, 3: S
-Channel = [0, 1, 2, 3]
-# Channel = [3]
+# Channel = [0, 1, 2, 3]
+Channel = [3]
 
 ITUSPlot = False
 SPlot = False
@@ -157,7 +157,7 @@ for order in Order:
         DataWithAngle[(order, chan)] = Data0
 
         # average the angle distribution
-        Data[(order, chan)] = AngleIntegation(Data0, 1)
+        Data[(order, chan)] = AngleIntegation(Data0, 0)
 
 
 def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):
