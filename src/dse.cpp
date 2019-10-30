@@ -45,11 +45,8 @@ ver4 verDiag::Build(array<momentum, MaxMomNum> &loopMom, int LoopNum,
   // } else
   //   ABORT("Root should only have one channel.");
 
-  if (Channel.size() == 1 && Channel[0] == S) {
-    LegK = {&(*LoopMom)[1], &(*LoopMom)[2], NextMom(), NextMom()};
-  } else {
-    LegK = {&(*LoopMom)[1], NextMom(), &(*LoopMom)[2], NextMom()};
-  }
+
+  LegK = {&(*LoopMom)[1], &(*LoopMom)[2], NextMom(), NextMom()};
 
 
   // if (Channel.size() == 1) {
@@ -123,7 +120,6 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
         }
       }
     }
-
 
 
   }

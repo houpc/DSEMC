@@ -10,13 +10,14 @@ import copy
 mat.rcParams.update({'font.size': 16})
 mat.rcParams["font.family"] = "Times New Roman"
 size = 12
-fdFlagList = [None, "Bare_", "Counter_", "Renorm_"]
+fdFlagList = [None, "Bare_", "Counter_", "Renorm_", "Bare_Minus_"]
 
 # XType = "Tau"
 XType = "Mom"
 # XType = "Angle"
+l = 1
 orderAccum = 3
-folderFlag = fdFlagList[3]
+folderFlag = fdFlagList[0]
 # 0: I, 1: T, 2: U, 3: S
 # Channel = [0, 1, 2, 3]
 Channel = [3]
@@ -140,7 +141,7 @@ for order in Order:
                     Step = int(line0.split(":")[-1])/1000000
                     # print "Step:", Step
                     line1 = file.readline()
-                    # print line1
+                    print("order:{0}, Norm:{1}".format(order,float(line1.split(":")[-1])))
                     Norm += float(line1.split(":")[-1])
                     line3 = file.readline()
                     if AngleBin is None:
@@ -158,12 +159,13 @@ for order in Order:
                 else:
                     Data0 += d
         Data0 /= Norm
+        print("Norm: ", Norm)
         Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize))
 
         DataWithAngle[(order, chan)] = Data0
 
         # average the angle distribution
-        Data[(order, chan)] = AngleIntegation(Data0, 1)
+        Data[(order, chan)] = AngleIntegation(Data0, l)
 
 DataAccum = copy.deepcopy(Data)
 for order in range(2, orderAccum+1):

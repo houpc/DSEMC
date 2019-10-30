@@ -133,7 +133,12 @@ while True:
             if Norm > 0 and Data0 is not None:
                 print "Total Weight: ", Data0[0]
                 Data0 /= Norm
-                Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize))
+                try:
+                    Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize))
+                except Exception as e:
+                    time.sleep(2)
+                    continue
+                
 
                 # print "Channel: ", chan
                 if DataWithAngle.has_key((order, chan)):
