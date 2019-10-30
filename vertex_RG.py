@@ -6,14 +6,17 @@ import sys
 import glob
 import os
 import re
+import copy
 mat.rcParams.update({'font.size': 16})
 mat.rcParams["font.family"] = "Times New Roman"
 size = 12
+fdFlagList = [None, "Bare_", "Counter_", "Renorm_"]
 
 # XType = "Tau"
 XType = "Mom"
 # XType = "Angle"
-OrderByOrder = False
+orderAccum = 3
+folderFlag = fdFlagList[3]
 # 0: I, 1: T, 2: U, 3: S
 # Channel = [0, 1, 2, 3]
 Channel = [3]
@@ -53,8 +56,10 @@ with open("inlist", "r") as file:
 
 Order = range(0, MaxOrder+1)
 
-folder = "./Beta{0}_rs{1}_lambda{2}/".format(int(Beta), rs, Lambda)
-# folder = "./3_Beta{0}_lambda{2}/".format(Beta, rs, Lambda)
+if folderFlag is None:
+    folder = "./Beta{0}_rs{1}_lambda{2}/".format(int(Beta), rs, Lambda)
+else:
+    folder = "./" + folderFlag + "Beta{0}_rs{1}_lambda{2}/".format(int(Beta), rs, Lambda)
 
 ##############   2D    ##################################
 ###### Bare Green's function    #########################
@@ -68,6 +73,7 @@ kF = (9.0*np.pi/4.0)**(1.0/3.0)/rs
 Bubble = 0.0971916  # 3D, Beta=10, rs=1
 
 Data = {}  # key: (order, channel)
+DataAccum = {}
 DataWithAngle = {}  # key: (order, channel)
 AngleBin = None
 ExtMomBin = None
@@ -157,7 +163,15 @@ for order in Order:
         DataWithAngle[(order, chan)] = Data0
 
         # average the angle distribution
-        Data[(order, chan)] = AngleIntegation(Data0, 0)
+        Data[(order, chan)] = AngleIntegation(Data0, 1)
+
+DataAccum = copy.deepcopy(Data)
+for order in range(2, orderAccum+1):
+    for chan in Channel:
+        DataAccum[(order, chan)] = DataAccum[(order-1, chan)]+Data[(order, chan)]
+        
+
+
 
 
 def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):
@@ -215,13 +229,10 @@ elif (XType == "Mom"):
         if(chan == 1):
             qData = 8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)
             # qData *= 0.0
-            qData -= Data[(0, chan)]
+            qData -= DataAccum[(orderAccum, chan)]
         else:
-            qData = Data[(0, chan)]
+            qData = DataAccum[(orderAccum, chan)]
 
-        # qData = np.sum(qData, axis=1)*Beta/kF**2/TauBinSize
-        # qData0 = 8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)-qData0
-        # qData=8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)-qData
 
         ErrorPlot(ax, ExtMomBin, qData,
                   ColorList[5+chan], MarkerList[chan-3], "Chan {1}".format(0, ChanName[chan]))

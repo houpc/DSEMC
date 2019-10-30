@@ -32,7 +32,9 @@ enum type { GU, GW, RG, PARQUET };
 enum obstype { FREQ, EQUALTIME };
 enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
 
-const bool BareCalc = true;
+const bool HasEffInteraction = false;
+const bool HasCounterTerm = false;
+
 
 typedef Vec<double, D> momentum;
 // typedef std::array<double, D> momentum;

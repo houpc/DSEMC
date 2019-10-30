@@ -39,7 +39,7 @@
 
 infile/
 outfile/
-Beta*/
+*Beta*/
 build/
 Data/
 test*/
