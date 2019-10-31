@@ -11,10 +11,12 @@
 #include "utility/abort.h"
 #include "utility/logger.h"
 #include "utility/timer.h"
+#include "utility/fmt/format.h"
 #include "weight.h"
 #include <iostream>
 #include <math.h>
 #include <unistd.h>
+#include <time.h>
 
 using namespace std;
 using namespace mc;
@@ -29,8 +31,13 @@ int main(int argc, const char *argv[]) {
           "PID\n";
   cin >> Para.Order >> Para.Beta >> Para.Rs >> Para.Mass2 >> Para.MaxExtMom >>
       Para.TotalStep >> Para.Seed >> Para.PID;
+
+  clock_t startTime = clock();
   InitPara(); // initialize global parameters
   MonteCarlo();
+  clock_t endTime = clock();
+  double duration = (double)(endTime - startTime)/CLOCKS_PER_SEC/60;
+  LOG_INFO(fmt::format("Total elapsed time: {0}", duration));
   return 0;
 }
 

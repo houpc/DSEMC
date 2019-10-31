@@ -16,7 +16,7 @@ fdFlagList = [None, "Bare_", "Counter_", "Renorm_"]
 XType = "Mom"
 # XType = "Angle"
 orderAccum = 3
-folderFlag = fdFlagList[3]
+folderFlag = fdFlagList[0]
 # 0: I, 1: T, 2: U, 3: S
 # Channel = [0, 1, 2, 3]
 Channel = [3]

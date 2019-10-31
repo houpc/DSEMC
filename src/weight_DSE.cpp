@@ -44,8 +44,6 @@ double weight::Evaluate(int LoopNum, int Channel) {
     } else if (Channel == dse::U) {
       *Root.LegK[OUTL] = Var.LoopMom[2] + Var.LoopMom[0];
       *Root.LegK[OUTR] = Var.LoopMom[1] - Var.LoopMom[0];
-      // *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
-      // *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
     } else {
       *Root.LegK[OUTL] = Var.LoopMom[1] - Var.LoopMom[0];
       *Root.LegK[OUTR] = Var.LoopMom[2] + Var.LoopMom[0];
