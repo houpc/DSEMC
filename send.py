@@ -31,16 +31,16 @@ for index, eachline in enumerate(inlist):
 
     homedir = os.getcwd() + \
         "/Beta{0}_rs{1}_lambda{2}".format(para[1], para[2], para[3])
-    if(os.path.exists(homedir) != True):
-        os.system("mkdir "+homedir)
+    if os.path.exists(homedir):
+        os.system("rm -fr "+homedir)
+    os.system("mkdir "+homedir)
 
     os.system("cp -r groups "+homedir)
     os.system("cp {0} {1}".format(execute, homedir))
 
     infilepath = homedir+"/infile"
-    if os.path.exists(infilepath):
-        os.system("rm -fr "+infilepath)
-    os.system("mkdir "+infilepath)
+    if (os.path.exists(infilepath) != True):
+        os.system("mkdir "+infilepath)
     outfilepath = homedir+"/outfile"
     if(os.path.exists(outfilepath) != True):
         os.system("mkdir "+outfilepath)
