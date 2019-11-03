@@ -10,14 +10,14 @@ import copy
 mat.rcParams.update({'font.size': 16})
 mat.rcParams["font.family"] = "Times New Roman"
 size = 12
-fdFlagList = [None, "Bare_", "Counter_", "Renorm_", "Bare_Minus_"]
+fdFlagList = [None, "Bare_Plus1_", "Bare_Minus1_", "Renorm_Plus2_", "Renorm_Minus2_"]
 
 # XType = "Tau"
 XType = "Mom"
 # XType = "Angle"
 l = 1
 orderAccum = 3
-folderFlag = fdFlagList[0]
+folderFlag = fdFlagList[4]
 # 0: I, 1: T, 2: U, 3: S
 # Channel = [0, 1, 2, 3]
 Channel = [3]
@@ -141,7 +141,6 @@ for order in Order:
                     Step = int(line0.split(":")[-1])/1000000
                     # print "Step:", Step
                     line1 = file.readline()
-                    print("order:{0}, Norm:{1}".format(order,float(line1.split(":")[-1])))
                     Norm += float(line1.split(":")[-1])
                     line3 = file.readline()
                     if AngleBin is None:
@@ -159,7 +158,6 @@ for order in Order:
                 else:
                     Data0 += d
         Data0 /= Norm
-        print("Norm: ", Norm)
         Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize))
 
         DataWithAngle[(order, chan)] = Data0
@@ -170,8 +168,7 @@ for order in Order:
 DataAccum = copy.deepcopy(Data)
 for order in range(2, orderAccum+1):
     for chan in Channel:
-        DataAccum[(order, chan)] = DataAccum[(order-1, chan)]+Data[(order, chan)]
-        
+        DataAccum[(order, chan)] = DataAccum[(order-1, chan)]+Data[(order, chan)]      
 
 
 
@@ -190,8 +187,10 @@ w = 1-0.429
 # plt.subplot(1,2,2)
 
 if SPlot:
-    ax = plt.subplot(1,2,1)
-    bx = plt.subplot(1,2,2)
+    ax = plt.subplot(2,2,1)
+    bx = plt.subplot(2,2,2)
+    cx = plt.subplot(2,2,3)
+    dx = plt.subplot(2,2,4)
 else:
     ax = plt.subplot(1,1,1)
 
@@ -219,13 +218,19 @@ elif (XType == "Mom"):
             else:
                 qData = Data[(order, chan)]
 
-            # qData = np.sum(qData, axis=1)*Beta/kF**2/TauBinSize
-            # qData0 = 8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)-qData0
-            # qData=8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)-qData
-            # print qData.shape, len(ExtMomBin)
-            # print qData
-            # ErrorPlot(ax, ExtMomBin, qData,
-                    #   ColorList[order], MarkerList[chan], "Loop {0}, Chan {1}".format(order, ChanName[chan]))
+            if SPlot:
+                ErrorPlot(cx, ExtMomBin, qData,
+                        ColorList[order], MarkerList[chan], "Loop {0}, Chan {1}".format(order, ChanName[chan]))
+                ErrorPlot(dx, ExtMomBin, DataAccum[(order, chan)],
+                        ColorList[order], MarkerList[chan], "Loop {0}, Chan {1}".format(order, ChanName[chan]))
+                cx.set_xlabel("$q/k_F$", size=size)
+                cx.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
+                cx.set_title("$\Gamma_4$ with order", size=size)
+                dx.set_xlabel("$q/k_F$", size=size)
+                dx.set_ylabel("$-\Gamma_4^{accumulate}(\omega=0, q)$", size=size)
+                dx.set_title("accumulate $\Gamma_4$ with order", size=size)
+    
+
 
     for chan in Channel:
         if(chan == 1):
@@ -241,9 +246,21 @@ elif (XType == "Mom"):
         if SPlot and chan==3:
             bxx = np.log(ExtMomBin[1:])  # because ExtMomBin[0] = 0
             bx.set_xlim(min(bxx),max(bxx))
-            bx.set_xlabel("$log(q/k_F)$", size=size)
+            bx.set_xlabel("$q/k_F$", size=size)
+            bx.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
             ErrorPlot(bx, bxx, qData[1:],
                   'r', MarkerList[0], "Chan {1}".format(0, ChanName[chan]))
+
+    ax.set_xlim([0.0, ExtMomBin[-1]])
+    ax.set_xlabel("$q/k_F$", size=size)
+    ax.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
+    try:
+        title = folderFlag.replace("_", " ")
+        title = "".join([i for i in title if not i.isdigit()]) + "Interaction"
+        plt.suptitle(title, size=size)
+    except Exception as e:
+        pass
+    
 
     x = np.arange(0, 3.0, 0.001)
     y = x*0.0+Bubble
@@ -260,9 +277,7 @@ elif (XType == "Mom"):
 
     # ax.plot(x, y0*y0*y, 'r-', lw=2, label="wrong")
 
-    ax.set_xlim([0.0, ExtMomBin[-1]])
-    # ax.set_xscale("log")
-    ax.set_xlabel("$q/k_F$", size=size)
+
 
 elif(XType == "Angle"):
     AngTotal = None

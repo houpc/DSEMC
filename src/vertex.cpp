@@ -150,8 +150,9 @@ double verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
   double kSQ = SQ.norm();
 
   if (VerType == 0) {
+    double amplitude = 1.0;
     double attrctRepel = -1.0;
-    return attrctRepel*( -8.0*PI/(kDiQ*kDiQ+Para.Mass2) + 8.0*PI/(kExQ*kExQ+Para.Mass2) );
+    return amplitude*attrctRepel*( -8.0*PI/(kDiQ*kDiQ+Para.Mass2) + 8.0*PI/(kExQ*kExQ+Para.Mass2) );
   } else if (VerType == 1) {
     if (!HasEffInteraction)
       return  0.0;
@@ -159,12 +160,12 @@ double verQTheta::Interaction(const array<momentum *, 4> &LegK, double Tau,
     if (kDiQ < 1.0 * Para.Kf || kExQ < 1.0 * Para.Kf || kSQ < 1.0 * Para.Kf) {
       int AngleIndex = Angle2Index(Angle3D(*LegK[INL], *LegK[INR]), AngBinSize);
       if (kDiQ < 1.0 * Para.Kf)
-        EffInt += EffInterT(AngleIndex, 0) * exp(-kDiQ * kDiQ / 0.1);
+        EffInt += EffInterT(AngleIndex, 0) * exp(-kDiQ * kDiQ / 0.5);
       if (kExQ < 1.0 * Para.Kf)
-        EffInt -= EffInterT(AngleIndex, 0) * exp(-kExQ * kExQ / 0.1);
+        EffInt -= EffInterT(AngleIndex, 0) * exp(-kExQ * kExQ / 0.5);
       AngleIndex = Angle2Index(Angle3D(*LegK[INL], *LegK[OUTL]), AngBinSize);
       if (kSQ < 1.0 * Para.Kf)
-        EffInt += EffInterS(AngleIndex, 0) * exp(-kSQ * kSQ / 0.1);
+        EffInt += EffInterS(AngleIndex, 0) * exp(-kSQ * kSQ / 0.8);
       return EffInt;
     } else
       return 0.0;
