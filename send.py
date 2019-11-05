@@ -10,6 +10,12 @@ Cluster = "local"
 
 ############################################
 
+if len(sys.argv) == 1:
+    folderPre = ""
+elif len(sys.argv) >= 2:
+    folderPre = "_".join(sys.argv[1:]) + "_"
+
+
 rootdir = os.getcwd()
 inlist = open(rootdir+"/inlist", "r")
 execute = "feyncalc.exe"
@@ -30,7 +36,7 @@ for index, eachline in enumerate(inlist):
     #     break
 
     homedir = os.getcwd() + \
-        "/Beta{0}_rs{1}_lambda{2}".format(para[1], para[2], para[3])
+        "/" + folderPre + "Beta{0}_rs{1}_lambda{2}".format(para[1], para[2], para[3])
     if os.path.exists(homedir):
         os.system("rm -fr "+homedir)
     os.system("mkdir "+homedir)

@@ -32,8 +32,13 @@ enum type { GU, GW, RG, PARQUET };
 enum obstype { FREQ, EQUALTIME };
 enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
 
-const bool HasEffInteraction = true;
-const bool HasCounterTerm = true;
+
+const double decayTU = 0.25;
+const double decayS = 0.25;
+const bool HasEffInteraction = false;
+const bool HasCounterTerm = false;
+const double amplitude = 1.0;
+const double attrctRepel = 1.0;
 
 
 typedef Vec<double, D> momentum;

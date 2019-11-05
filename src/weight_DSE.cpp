@@ -129,10 +129,10 @@ void weight::ChanUST(dse::ver4 &Ver4) {
         Ratio = Para.Kf / (*LegK0[INR]).norm();
         *bubble.LegK[T][INR] = *LegK0[INR] * Ratio;
         if (DirQ < 1.0 * Para.Kf) {
-          bubble.ProjFactor[T] = exp(-DirQ * DirQ / 0.1);
+          bubble.ProjFactor[T] = exp(-DirQ * DirQ / decayTU);
         }
         if (ExQ < 1.0 * Para.Kf) {
-          bubble.ProjFactor[U] = exp(-ExQ * ExQ / 0.1);
+          bubble.ProjFactor[U] = exp(-ExQ * ExQ / decayTU);
         }
       }
     }
@@ -147,7 +147,7 @@ void weight::ChanUST(dse::ver4 &Ver4) {
           *bubble.LegK[S][OUTL] = *LegK0[OUTL] * Ratio;
           *bubble.LegK[S][INR] = *bubble.LegK[S][INL] * (-1.0);
           *bubble.LegK[S][OUTR] = *bubble.LegK[S][OUTL] * (-1.0);
-          bubble.ProjFactor[S] = exp(-InQ * InQ / 0.1);
+          bubble.ProjFactor[S] = exp(-InQ * InQ / decayS);
         }
         
     }

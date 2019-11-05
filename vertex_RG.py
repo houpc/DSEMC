@@ -10,14 +10,14 @@ import copy
 mat.rcParams.update({'font.size': 16})
 mat.rcParams["font.family"] = "Times New Roman"
 size = 12
-fdFlagList = [None, "Bare_Plus1_", "Bare_Minus1_", "Renorm_Plus2_", "Renorm_Minus2_"]
+fdFlagList = [None, "Bare_", "Renorm_", "Renorm_Decay2.5_"]
 
 # XType = "Tau"
 XType = "Mom"
 # XType = "Angle"
 l = 1
 orderAccum = 3
-folderFlag = fdFlagList[4]
+folderFlag = fdFlagList[2]
 # 0: I, 1: T, 2: U, 3: S
 # Channel = [0, 1, 2, 3]
 Channel = [3]
@@ -61,6 +61,7 @@ if folderFlag is None:
     folder = "./Beta{0}_rs{1}_lambda{2}/".format(int(Beta), rs, Lambda)
 else:
     folder = "./" + folderFlag + "Beta{0}_rs{1}_lambda{2}/".format(int(Beta), rs, Lambda)
+print(folder)
 
 ##############   2D    ##################################
 ###### Bare Green's function    #########################

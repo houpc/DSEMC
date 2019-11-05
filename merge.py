@@ -1,9 +1,17 @@
+#!/usr/bin/python
+
 import os
 import sys
 import re
 import glob
 import time
 import numpy as np
+
+if len(sys.argv) == 1:
+    folderPre = ""
+elif len(sys.argv) >= 2:
+    folderPre = "_".join(sys.argv[1:]) + "_"
+
 
 SleepTime = 10
 
@@ -35,7 +43,7 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 # 0: total, 1: order 1, ...
 Order = [0, ]
 
-folder = "./Beta{0}_rs{1}_lambda{2}/".format(BetaStr, rsStr, LambdaStr)
+folder = "./" + folderPre + "Beta{0}_rs{1}_lambda{2}/".format(BetaStr, rsStr, LambdaStr)
 
 AngleBin = None
 ExtMomBin = None
