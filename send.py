@@ -9,6 +9,7 @@ Cluster = "local"
 # Cluster="condor"
 
 ############################################
+print("Cluster: {0}".format(Cluster))
 
 if len(sys.argv) == 1:
     folderPre = ""
@@ -19,12 +20,15 @@ elif len(sys.argv) >= 2:
 rootdir = os.getcwd()
 inlist = open(rootdir+"/inlist", "r")
 execute = "feyncalc.exe"
+merge = "merge.py"
+infile = "inlist"
+
 
 for index, eachline in enumerate(inlist):
     para = eachline.split()
 
     if len(para) == 0:
-        print "All submitted!"
+        print("All submitted!")
         break
 
     # if int(para[-2])==0:
@@ -43,6 +47,8 @@ for index, eachline in enumerate(inlist):
 
     os.system("cp -r groups "+homedir)
     os.system("cp {0} {1}".format(execute, homedir))
+    os.system("cp {0} {1}".format(merge, homedir))
+    os.system("cp {0} {1}".format(infile, homedir))
 
     infilepath = homedir+"/infile"
     if (os.path.exists(infilepath) != True):
@@ -53,6 +59,9 @@ for index, eachline in enumerate(inlist):
     jobfilepath = homedir+"/jobfile"
     if(os.path.exists(jobfilepath) != True):
         os.system("mkdir "+jobfilepath)
+    weightpath = homedir+"/weight"
+    if(os.path.exists(weightpath) != True):
+        os.system("mkdir "+weightpath)
 
     for pid in range(int(para[-1])):
 
@@ -107,5 +116,10 @@ for index, eachline in enumerate(inlist):
         else:
             print("I don't know what is {0}".format(Cluster))
             break
+    
+    os.chdir(homedir)
+    if "bare" not in folderPre.lower():
+        os.system("./" + merge + " > weight.log &")
+        
 print("Jobs manage daemon is ended")
 sys.exit(0)

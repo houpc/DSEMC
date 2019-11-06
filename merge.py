@@ -7,11 +7,6 @@ import glob
 import time
 import numpy as np
 
-if len(sys.argv) == 1:
-    folderPre = ""
-elif len(sys.argv) >= 2:
-    folderPre = "_".join(sys.argv[1:]) + "_"
-
 
 SleepTime = 10
 
@@ -34,7 +29,6 @@ with open("inlist", "r") as file:
     Lambda = float(LambdaStr)
     TotalStep = float(para[5])
 
-print rs, Beta, Lambda, TotalStep
 
 # 0: I, 1: T, 2: U, 3: S
 Channel = [0, 1, 2, 3]
@@ -43,7 +37,7 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 # 0: total, 1: order 1, ...
 Order = [0, ]
 
-folder = "./" + folderPre + "Beta{0}_rs{1}_lambda{2}/".format(BetaStr, rsStr, LambdaStr)
+folder = "./" #+ folderPre + "Beta{0}_rs{1}_lambda{2}/".format(BetaStr, rsStr, LambdaStr)
 
 AngleBin = None
 ExtMomBin = None
@@ -77,6 +71,9 @@ def AngleIntegation(Data, l):
     return Result/2.0
     # return Result
 
+
+print("rs:{0}, Beta:{1}, Lambda:{2}, TotalStep:{3}".format(
+    rs, Beta, Lambda, TotalStep))
 
 while True:
 
@@ -167,37 +164,37 @@ while True:
     if len(DataWithAngle) > 0:
         print "Write Weight file."
         for chan in Channel:
-            with open("weight{0}.data".format(chan), "w") as file:
+            with open("./weight/weight{0}.data".format(chan), "w") as file:
                 for angle in range(AngleBinSize):
                     for qidx in range(ExtMomBinSize):
                         file.write("{0} ".format(
                             DataWithAngle[(0, chan)][angle, qidx]))
 
-        with open("data.data", "a") as file:
+        with open("./weight/data.data", "a") as file:
             file.write("{0:10.6f} {1:10.6f} {2:10.6f} {3:10.6f}\n".format(
                 Data[(0, 1)][0], Data[(0, 1)][0], Data[(0, 2)][0], Data[(0, 3)][0]))
 
+        
         qData = Data[(0, 1)]
         qData = 8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)-qData
-        # print qData
-        print "  Q/kF,    T,    Error"
+        print("  Q/kF,    T,    Error")
         for i in range(len(qData)):
-            print "{0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-                ExtMomBin[i], qData[i], DataErr[(0, 1)][i])
+            print("{0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+                ExtMomBin[i], qData[i], DataErr[(0, 1)][i]))
 
         qData = Data[(0, 2)]
-        print "  Q/kF,    U,    Error"
+        print("  Q/kF,    U,    Error")
         for i in range(len(qData)):
-            print "{0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-                ExtMomBin[i], qData[i], DataErr[(0, 2)][i])
+            print("{0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+                ExtMomBin[i], qData[i], DataErr[(0, 2)][i]))
 
         qData = Data[(0, 3)]
-        print "  Q/kF,    S,    Error"
+        print("  Q/kF,    S,    Error")
         for i in range(len(qData)):
-            print "{0:6.2f}, {1:10.6f}, {2:10.6f}".format(
-                ExtMomBin[i], qData[i], DataErr[(0, 3)][i])
+            print("{0:6.2f}, {1:10.6f}, {2:10.6f}".format(
+                ExtMomBin[i], qData[i], DataErr[(0, 3)][i]))
 
-    print "Step:{0}, TotalStep:{1}".format(Step, TotalStep)
+    print("Step:{0}, TotalStep:{1} ".format(Step, TotalStep))
     if Step >= TotalStep:
-        print "End of Simulation!"
+        print("End of Simulation!")
         sys.exit(0)

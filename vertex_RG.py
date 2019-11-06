@@ -10,14 +10,14 @@ import copy
 mat.rcParams.update({'font.size': 16})
 mat.rcParams["font.family"] = "Times New Roman"
 size = 12
-fdFlagList = [None, "Bare_", "Renorm_", "Renorm_Decay2.5_"]
+fdFlagList = ["", "Bare_", "Renorm_", "Renorm_Decay2.5_"]
 
 # XType = "Tau"
 XType = "Mom"
 # XType = "Angle"
 l = 1
 orderAccum = 3
-folderFlag = fdFlagList[2]
+folderFlag = ["Bare_", "Renorm_"]   #[fdFlagList[1], fdFlagList[2]]
 # 0: I, 1: T, 2: U, 3: S
 # Channel = [0, 1, 2, 3]
 Channel = [3]
@@ -34,6 +34,7 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 # 0: total, 1: order 1, ...
 # Order = [0, 1, 2, 3]
 
+
 MaxOrder = None
 rs = None
 Lambda = None
@@ -42,6 +43,11 @@ TotalStep = None
 BetaStr = None
 rsStr = None
 LambdaStr = None
+AngleBin = None
+ExtMomBin = None
+AngleBinSize = None
+ExtMomBinSize = None
+
 
 with open("inlist", "r") as file:
     line = file.readline()
@@ -57,11 +63,6 @@ with open("inlist", "r") as file:
 
 Order = range(0, MaxOrder+1)
 
-if folderFlag is None:
-    folder = "./Beta{0}_rs{1}_lambda{2}/".format(int(Beta), rs, Lambda)
-else:
-    folder = "./" + folderFlag + "Beta{0}_rs{1}_lambda{2}/".format(int(Beta), rs, Lambda)
-print(folder)
 
 ##############   2D    ##################################
 ###### Bare Green's function    #########################
@@ -77,10 +78,6 @@ Bubble = 0.0971916  # 3D, Beta=10, rs=1
 Data = {}  # key: (order, channel)
 DataAccum = {}
 DataWithAngle = {}  # key: (order, channel)
-AngleBin = None
-ExtMomBin = None
-AngleBinSize = None
-ExtMomBinSize = None
 
 
 def AngleIntegation(Data, l):
@@ -120,56 +117,65 @@ def Mirror(x, y):
 #         Beta/kF**2/TauBinSize
 
 
-for order in Order:
-    for chan in Channel:
+def readData(folder):
+    global AngleBin
+    global ExtMomBin
+    global AngleBinSize
+    global ExtMomBinSize
+    global Data
+    global DataAccum
+    global DataWithAngle
 
-        files = os.listdir(folder)
-        Num = 0
-        Norm = 0
-        Data0 = None
-        # if(order == 0):
-        #     FileName = "vertex{0}_pid[0-9]+.dat".format(chan)
-        # else:
-        #     FileName = "vertex{0}_{1}_pid[0-9]+.dat".format(order, chan)
+    for order in Order:
+        for chan in Channel:
 
-        FileName = "vertex{0}_{1}_pid[0-9]+.dat".format(order, chan)
+            files = os.listdir(folder)
+            Num = 0
+            Norm = 0
+            Data0 = None
+            # if(order == 0):
+            #     FileName = "vertex{0}_pid[0-9]+.dat".format(chan)
+            # else:
+            #     FileName = "vertex{0}_{1}_pid[0-9]+.dat".format(order, chan)
 
-        for f in files:
-            if re.match(FileName, f):
-                print("Loading ", f)
-                with open(folder+f, "r") as file:
-                    line0 = file.readline()
-                    Step = int(line0.split(":")[-1])/1000000
-                    # print "Step:", Step
-                    line1 = file.readline()
-                    Norm += float(line1.split(":")[-1])
-                    line3 = file.readline()
-                    if AngleBin is None:
-                        AngleBin = np.fromstring(line3.split(":")[1], sep=' ')
-                        AngleBinSize = len(AngleBin)
-                    line4 = file.readline()
-                    if ExtMomBin is None:
-                        ExtMomBin = np.fromstring(line4.split(":")[1], sep=' ')
-                        ExtMomBinSize = len(ExtMomBin)
-                        ExtMomBin /= kF
-                Num += 1
-                d = np.loadtxt(folder+f)
-                if Data0 is None:
-                    Data0 = d
-                else:
-                    Data0 += d
-        Data0 /= Norm
-        Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize))
+            FileName = "vertex{0}_{1}_pid[0-9]+.dat".format(order, chan)
 
-        DataWithAngle[(order, chan)] = Data0
+            for f in files:
+                if re.match(FileName, f):
+                    print("Loading ", f)
+                    with open(folder+f, "r") as file:
+                        line0 = file.readline()
+                        Step = int(line0.split(":")[-1])/1000000
+                        # print "Step:", Step
+                        line1 = file.readline()
+                        Norm += float(line1.split(":")[-1])
+                        line3 = file.readline()
+                        if AngleBin is None:
+                            AngleBin = np.fromstring(line3.split(":")[1], sep=' ')
+                            AngleBinSize = len(AngleBin)
+                        line4 = file.readline()
+                        if ExtMomBin is None:
+                            ExtMomBin = np.fromstring(line4.split(":")[1], sep=' ')
+                            ExtMomBinSize = len(ExtMomBin)
+                            ExtMomBin /= kF
+                    Num += 1
+                    d = np.loadtxt(folder+f)
+                    if Data0 is None:
+                        Data0 = d
+                    else:
+                        Data0 += d
+            Data0 /= Norm
+            Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize))
 
-        # average the angle distribution
-        Data[(order, chan)] = AngleIntegation(Data0, l)
+            DataWithAngle[(order, chan)] = Data0
 
-DataAccum = copy.deepcopy(Data)
-for order in range(2, orderAccum+1):
-    for chan in Channel:
-        DataAccum[(order, chan)] = DataAccum[(order-1, chan)]+Data[(order, chan)]      
+            # average the angle distribution
+            Data[(order, chan)] = AngleIntegation(Data0, l)
+
+    DataAccum = copy.deepcopy(Data)
+    for order in range(2, orderAccum+1):
+        for chan in Channel:
+            DataAccum[(order, chan)] = DataAccum[(order-1, chan)]+Data[(order, chan)]      
 
 
 
@@ -179,162 +185,173 @@ def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):
            lw=1, markeredgecolor="None", linestyle="--", markersize=size)
 
 
-w = 1-0.429
 
-# fig, ax = plt.subplots()
-# ax=fig.add_axes()
-# ax = fig.add_subplot(122)
+def plot():
+    w = 1-0.429
 
-# plt.subplot(1,2,2)
+    if SPlot:
+        ax = plt.subplot(2,2,1)
+        bx = plt.subplot(2,2,2)
+        cx = plt.subplot(2,2,3)
+        dx = plt.subplot(2,2,4)
+    else:
+        ax = plt.subplot(1,1,1)
 
-if SPlot:
-    ax = plt.subplot(2,2,1)
-    bx = plt.subplot(2,2,2)
-    cx = plt.subplot(2,2,3)
-    dx = plt.subplot(2,2,4)
-else:
-    ax = plt.subplot(1,1,1)
+    MarkerList = ['s','o','v','d','x','^','<','>','*','2','3','4','H','+','D', '.', ',']
+    ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy', 'y','lime','fuchsia', 'aqua','sandybrown','slategrey']
+    ColorList = ColorList*40
 
-MarkerList = ['s','o','v','d','x','^','<','>','*','2','3','4','H','+','D', '.', ',']
-ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy', 'y','lime','fuchsia', 'aqua','sandybrown','slategrey']
-ColorList = ColorList*40
-
-if(XType == "Scale"):
-    for i in range(ExtMomBinSize/4):
-        index = 4*i
-        ErrorPlot(ax, ScaleBin[:-2], diffData[:-2, index],
-                  ColorList[i], 's', "Q {0}".format(ExtMomBin[index]))
-    ax.set_xlim([0.0, ScaleBin[-2]])
-    ax.set_xlabel("$Scale$", size=size)
-elif (XType == "Mom"):
-    i = 0
-    for chan in Channel:
-        if(chan == 1):
-            qData = 8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)
-            # qData *= 0.0
-        for order in Order[1:]:
-            i += 1
+    if(XType == "Scale"):
+        for i in range(ExtMomBinSize/4):
+            index = 4*i
+            ErrorPlot(ax, ScaleBin[:-2], diffData[:-2, index],
+                    ColorList[i], 's', "Q {0}".format(ExtMomBin[index]))
+        ax.set_xlim([0.0, ScaleBin[-2]])
+        ax.set_xlabel("$Scale$", size=size)
+    elif (XType == "Mom"):
+        i = 0
+        for chan in Channel:
             if(chan == 1):
-                qData -= Data[(order, chan)]
+                qData = 8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)
+                # qData *= 0.0
+            for order in Order[1:]:
+                i += 1
+                if(chan == 1):
+                    qData -= Data[(order, chan)]
+                else:
+                    qData = Data[(order, chan)]
+
+                if SPlot:
+                    ErrorPlot(cx, ExtMomBin, qData,
+                            ColorList[order], MarkerList[chan], "Loop {0}, Chan {1}".format(order, ChanName[chan]))
+                    ErrorPlot(dx, ExtMomBin, DataAccum[(order, chan)],
+                            ColorList[order], MarkerList[chan], "Loop {0}, Chan {1}".format(order, ChanName[chan]))
+                    cx.set_xlabel("$q/k_F$", size=size)
+                    cx.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
+                    cx.set_title("$\Gamma_4$ with order", size=size)
+                    dx.set_xlabel("$q/k_F$", size=size)
+                    dx.set_ylabel("$-\Gamma_4^{accumulate}(\omega=0, q)$", size=size)
+                    dx.set_title("accumulate $\Gamma_4$ with order", size=size)
+        
+        for chan in Channel:
+            if(chan == 1):
+                qData = 8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)
+                # qData *= 0.0
+                qData -= DataAccum[(orderAccum, chan)]
             else:
-                qData = Data[(order, chan)]
+                qData = DataAccum[(orderAccum, chan)]
 
-            if SPlot:
-                ErrorPlot(cx, ExtMomBin, qData,
-                        ColorList[order], MarkerList[chan], "Loop {0}, Chan {1}".format(order, ChanName[chan]))
-                ErrorPlot(dx, ExtMomBin, DataAccum[(order, chan)],
-                        ColorList[order], MarkerList[chan], "Loop {0}, Chan {1}".format(order, ChanName[chan]))
-                cx.set_xlabel("$q/k_F$", size=size)
-                cx.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
-                cx.set_title("$\Gamma_4$ with order", size=size)
-                dx.set_xlabel("$q/k_F$", size=size)
-                dx.set_ylabel("$-\Gamma_4^{accumulate}(\omega=0, q)$", size=size)
-                dx.set_title("accumulate $\Gamma_4$ with order", size=size)
+
+            ErrorPlot(ax, ExtMomBin, qData,
+                    ColorList[5+chan], MarkerList[chan-3], "Chan {1}".format(0, ChanName[chan]))
+            if SPlot and chan==3:
+                bxx = np.log(ExtMomBin[1:])  # because ExtMomBin[0] = 0
+                bx.set_xlim(min(bxx),max(bxx))
+                bx.set_xlabel("$q/k_F$", size=size)
+                bx.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
+                ErrorPlot(bx, bxx, qData[1:],
+                    'r', MarkerList[0], "Chan {1}".format(0, ChanName[chan]))
+
+        ax.set_xlim([0.0, ExtMomBin[-1]])
+        ax.set_xlabel("$q/k_F$", size=size)
+        ax.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
+        try:
+            title = folderFlag.replace("_", " ")
+            title = "".join([i for i in title if not i.isdigit()]) + "Interaction"
+            plt.suptitle(title, size=size)
+        except Exception as e:
+            pass
+        
+
+        x = np.arange(0, 3.0, 0.001)
+        y = x*0.0+Bubble
+        for i in range(len(x)):
+            if x[i] > 2.0:
+                y[i] = Bubble*(1-np.sqrt(1-4/x[i]**2))
+        y0 = 8.0*np.pi/(x*x*kF*kF+Lambda)
+        # ym=y0-y0*y0*y
+        yphy = 8.0*np.pi/(x*x*kF*kF+Lambda+y*8.0*np.pi)
+
+        # ax.plot(x, yphy, 'k-', lw=2, label="physical")
+        if ITUSPlot:
+            ax.plot(x, y0, 'k-', lw=2, label="original")
+
+        # ax.plot(x, y0*y0*y, 'r-', lw=2, label="wrong")
+
+
+
+    elif(XType == "Angle"):
+        AngTotal = None
+        for chan in Channel[0:]:
+            AngData = -DataWithAngle[(0, chan)]
+            if AngTotal is None:
+                AngTotal = AngData
+            else:
+                AngTotal += AngData
+            # for i in range(ExtMomBinSize/8):
+            #     # print i, index
+            #     # print ScaleBin[index]
+            #     index = 8*i
+            #     ErrorPlot(ax, AngleBin, AngData[:, index],
+            #               ColorList[i], 's', "Q {0}".format(ExtMomBin[index]))
+
+            # ErrorPlot(ax, AngleBin, AngData[:, 0]/np.sin(np.arccos(AngleBin)),
+            #           ColorList[0], 's', "Q {0}".format(ExtMomBin[0]))
+
+            x2, y2 = Mirror(np.arccos(AngleBin), AngData[:, 0])
+
+            ErrorPlot(ax, x2, y2, ColorList[chan+1], MarkerList[chan],
+                    "q/kF={0}, {1}".format(ExtMomBin[0], ChanName[chan]))
+            # ErrorPlot(ax, np.arccos(AngleBin), AngData[:, 0], ColorList[chan+1], 's',
+            #           "Q {0}, {1}".format(ExtMomBin[0], ChanName[chan]))
+        # print np.arccos(AngleBin)
+        # AngTotal *= -0.0
+
+        AngHalf = np.arccos(AngleBin)/2.0
+        # AngTotal[:, 0] += 8.0*np.pi/Lambda-8.0 * \
+        #     np.pi / ((2.0*kF*np.sin(AngHalf))**2+Lambda)
+        x2, y2 = Mirror(np.arccos(AngleBin), AngTotal[:, 0])
+
+        # ErrorPlot(ax, x2, y2, ColorList[0], 's',
+                #   "q/kF={0}, Total".format(ExtMomBin[0]))
+
+        # ErrorPlot(ax, np.arccos(AngleBin), AngTotal[:, 0], ColorList[0], 's',
+        #           "Q {0}, Total".format(ExtMomBin[0]))
+
+        ax.set_xlim([-np.arccos(AngleBin[0]), np.arccos(AngleBin[0])])
+        # ax.set_ylim([0.0, 5.0])
+        ax.set_xlabel("$Angle$", size=size)
+    # ax.set_xticks([0.0,0.04,0.08,0.12])
+    # ax.set_yticks([0.35,0.4,0.45,0.5])
+    # ax.set_ylim([-0.02, 0.125])
+    # ax.set_ylim([0.07, 0.125])
+    # ax.xaxis.set_label_coords(0.97, -0.01)
+    # # ax.yaxis.set_label_coords(0.97, -0.01)
+    # ax.text(-0.012,0.52, "$-I$", fontsize=size)
+
+
+
+    # ax.text(0.02,0.47, "$\\sim {\\frac{1}{2}-}\\frac{1}{2} {\\left( \\frac{r}{L} \\right)} ^{2-s}$", fontsize=28)
+
     
 
 
-    for chan in Channel:
-        if(chan == 1):
-            qData = 8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)
-            # qData *= 0.0
-            qData -= DataAccum[(orderAccum, chan)]
-        else:
-            qData = DataAccum[(orderAccum, chan)]
+def main():
+    for i in range(len(folderFlag)):
+        ff = folderFlag[i]
+        folder = "./" + ff + "Beta{0}_rs{1}_lambda{2}/".format(int(Beta), rs, Lambda)
+        print(folder)
+        readData(folder)
+        plt.figure(i)
+        plot()
 
-
-        ErrorPlot(ax, ExtMomBin, qData,
-                  ColorList[5+chan], MarkerList[chan-3], "Chan {1}".format(0, ChanName[chan]))
-        if SPlot and chan==3:
-            bxx = np.log(ExtMomBin[1:])  # because ExtMomBin[0] = 0
-            bx.set_xlim(min(bxx),max(bxx))
-            bx.set_xlabel("$q/k_F$", size=size)
-            bx.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
-            ErrorPlot(bx, bxx, qData[1:],
-                  'r', MarkerList[0], "Chan {1}".format(0, ChanName[chan]))
-
-    ax.set_xlim([0.0, ExtMomBin[-1]])
-    ax.set_xlabel("$q/k_F$", size=size)
-    ax.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
-    try:
-        title = folderFlag.replace("_", " ")
-        title = "".join([i for i in title if not i.isdigit()]) + "Interaction"
-        plt.suptitle(title, size=size)
-    except Exception as e:
-        pass
-    
-
-    x = np.arange(0, 3.0, 0.001)
-    y = x*0.0+Bubble
-    for i in range(len(x)):
-        if x[i] > 2.0:
-            y[i] = Bubble*(1-np.sqrt(1-4/x[i]**2))
-    y0 = 8.0*np.pi/(x*x*kF*kF+Lambda)
-    # ym=y0-y0*y0*y
-    yphy = 8.0*np.pi/(x*x*kF*kF+Lambda+y*8.0*np.pi)
-
-    # ax.plot(x, yphy, 'k-', lw=2, label="physical")
-    if ITUSPlot:
-        ax.plot(x, y0, 'k-', lw=2, label="original")
-
-    # ax.plot(x, y0*y0*y, 'r-', lw=2, label="wrong")
+    plt.legend(loc=1, frameon=False, fontsize=size)
+    plt.tight_layout()
+    plt.show()
 
 
 
-elif(XType == "Angle"):
-    AngTotal = None
-    for chan in Channel[0:]:
-        AngData = -DataWithAngle[(0, chan)]
-        if AngTotal is None:
-            AngTotal = AngData
-        else:
-            AngTotal += AngData
-        # for i in range(ExtMomBinSize/8):
-        #     # print i, index
-        #     # print ScaleBin[index]
-        #     index = 8*i
-        #     ErrorPlot(ax, AngleBin, AngData[:, index],
-        #               ColorList[i], 's', "Q {0}".format(ExtMomBin[index]))
 
-        # ErrorPlot(ax, AngleBin, AngData[:, 0]/np.sin(np.arccos(AngleBin)),
-        #           ColorList[0], 's', "Q {0}".format(ExtMomBin[0]))
 
-        x2, y2 = Mirror(np.arccos(AngleBin), AngData[:, 0])
-
-        ErrorPlot(ax, x2, y2, ColorList[chan+1], MarkerList[chan],
-                  "q/kF={0}, {1}".format(ExtMomBin[0], ChanName[chan]))
-        # ErrorPlot(ax, np.arccos(AngleBin), AngData[:, 0], ColorList[chan+1], 's',
-        #           "Q {0}, {1}".format(ExtMomBin[0], ChanName[chan]))
-    # print np.arccos(AngleBin)
-    # AngTotal *= -0.0
-
-    AngHalf = np.arccos(AngleBin)/2.0
-    # AngTotal[:, 0] += 8.0*np.pi/Lambda-8.0 * \
-    #     np.pi / ((2.0*kF*np.sin(AngHalf))**2+Lambda)
-    x2, y2 = Mirror(np.arccos(AngleBin), AngTotal[:, 0])
-
-    # ErrorPlot(ax, x2, y2, ColorList[0], 's',
-            #   "q/kF={0}, Total".format(ExtMomBin[0]))
-
-    # ErrorPlot(ax, np.arccos(AngleBin), AngTotal[:, 0], ColorList[0], 's',
-    #           "Q {0}, Total".format(ExtMomBin[0]))
-
-    ax.set_xlim([-np.arccos(AngleBin[0]), np.arccos(AngleBin[0])])
-    # ax.set_ylim([0.0, 5.0])
-    ax.set_xlabel("$Angle$", size=size)
-# ax.set_xticks([0.0,0.04,0.08,0.12])
-# ax.set_yticks([0.35,0.4,0.45,0.5])
-# ax.set_ylim([-0.02, 0.125])
-# ax.set_ylim([0.07, 0.125])
-# ax.xaxis.set_label_coords(0.97, -0.01)
-# # ax.yaxis.set_label_coords(0.97, -0.01)
-# ax.text(-0.012,0.52, "$-I$", fontsize=size)
-ax.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
-
-# ax.text(0.02,0.47, "$\\sim {\\frac{1}{2}-}\\frac{1}{2} {\\left( \\frac{r}{L} \\right)} ^{2-s}$", fontsize=28)
-
-plt.legend(loc=1, frameon=False, fontsize=size)
-# plt.title("2D density integral")
-plt.tight_layout()
-
-# plt.savefig("spin_rs1_lambda1.pdf")
-plt.show()
+if __name__ == "__main__":
+    main()

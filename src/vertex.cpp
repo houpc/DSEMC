@@ -329,7 +329,7 @@ void verQTheta::ClearStatis() {
 void verQTheta::LoadWeight() {
   try {
     for (int chan = 0; chan < 4; chan++) {
-      string FileName = fmt::format("../weight{0}.data", chan);
+      string FileName = fmt::format("./weight/weight{0}.data", chan);
       ifstream VerFile;
       VerFile.open(FileName, ios::in);
       if (VerFile.is_open()) {
