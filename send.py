@@ -26,14 +26,12 @@ newinlist = "inlist"
 
 paraList = []
 for index, eachline in enumerate(inlist):
+    os.chdir(rootdir)
     para = eachline.split()
     
     if len(para) == 0:
         print("All submitted!")
         break
-
-    paraList.append("{0}_{1}_{2}".format(para[1], para[2], para[3]))
-
 
 
     # if int(para[-2])==0:
@@ -45,7 +43,15 @@ for index, eachline in enumerate(inlist):
     #     break
 
     homedir = os.getcwd() + \
-        "/" + folderPre + "MaxOrd{0}_Beta{1}_lambda{2}".format(para[0], para[1], para[3])
+        "/" + folderPre + "Order{0}_Beta{1}_lambda{2}".format(para[0], para[1], para[3])
+    paraName = "{0}_{1}_{2}".format(para[0], para[1], para[3])
+    if paraName in paraList:
+        homedir = os.getcwd() + \
+            "/" + folderPre + "Order{0}_Beta{1}_rs{2}_lambda{3}_Step{4}".format(
+            para[0],para[1],para[2],para[3],para[5])
+    paraList.append(paraName)
+
+    # continue
     if os.path.exists(homedir):
         os.system("rm -fr "+homedir)
     os.system("mkdir "+homedir)
@@ -126,6 +132,7 @@ for index, eachline in enumerate(inlist):
     os.chdir(homedir)
     if "bare" not in folderPre.lower():
         os.system("./" + merge + " > weight.log &")
+    os.chdir("..")
         
 print("Jobs manage daemon is ended")
 sys.exit(0)

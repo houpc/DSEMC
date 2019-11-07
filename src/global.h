@@ -34,7 +34,7 @@ enum ver4type { POINT, FULL, MOM, MOM_ANGLE };
 
 
 const double decayTU = 0.1;
-const double decayS = 0.25;
+const double decayS = 0.1;
 const bool HasEffInteraction = true;
 const bool HasCounterTerm = true;
 const double amplitude = 1.0;

@@ -194,7 +194,7 @@ def main():
     orderList = [1, 2, 3]
     for i in range(len(folderPre)):
         ff = folderPre[i]
-        folder = "./" + ff + "MaxOrd{0}_Beta{1}_lambda{2}".format(para[0], para[1], para[3])
+        folder = "./" + ff + "Order{0}_Beta{1}_lambda{2}".format(para[0], para[1], para[3])
         print(folder)
         readData(folder)
         res = [DataAccum[o,Channel[0]][0] for o in range(1,4)]

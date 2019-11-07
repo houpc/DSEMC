@@ -340,7 +340,7 @@ def plot():
 def main():
     for i in range(len(folderPre)):
         ff = folderPre[i]
-        folder = "./" + ff + "MaxOrd{0}_Beta{1}_lambda{2}".format(para[0], para[1], para[3])
+        folder = "./" + ff + "Order{0}_Beta{1}_lambda{2}".format(para[0], para[1], para[3])
         print(folder)
         readData(folder)
         plt.figure(i+1)
