@@ -17,7 +17,7 @@ XType = "Mom"
 # XType = "Angle"
 l = 1
 orderAccum = 3
-folderFlag = ["Bare_", "Renorm_"]   #[fdFlagList[1], fdFlagList[2]]
+folderPre = ["Bare_", "Renorm_"]   #[fdFlagList[1], fdFlagList[2]]
 # 0: I, 1: T, 2: U, 3: S
 # Channel = [0, 1, 2, 3]
 Channel = [3]
@@ -226,6 +226,7 @@ def plot():
                             ColorList[order], MarkerList[chan], "Loop {0}, Chan {1}".format(order, ChanName[chan]))
                     ErrorPlot(dx, ExtMomBin, DataAccum[(order, chan)],
                             ColorList[order], MarkerList[chan], "Loop {0}, Chan {1}".format(order, ChanName[chan]))
+                    print("order:{0}, Gamma4:{1}".format(order,qData[0]))
                     cx.set_xlabel("$q/k_F$", size=size)
                     cx.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
                     cx.set_title("$\Gamma_4$ with order", size=size)
@@ -247,7 +248,7 @@ def plot():
             if SPlot and chan==3:
                 bxx = np.log(ExtMomBin[1:])  # because ExtMomBin[0] = 0
                 bx.set_xlim(min(bxx),max(bxx))
-                bx.set_xlabel("$q/k_F$", size=size)
+                bx.set_xlabel("$\log(q/k_F)$", size=size)
                 bx.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
                 ErrorPlot(bx, bxx, qData[1:],
                     'r', MarkerList[0], "Chan {1}".format(0, ChanName[chan]))
@@ -256,7 +257,7 @@ def plot():
         ax.set_xlabel("$q/k_F$", size=size)
         ax.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
         try:
-            title = folderFlag.replace("_", " ")
+            title = folderPre.replace("_", " ")
             title = "".join([i for i in title if not i.isdigit()]) + "Interaction"
             plt.suptitle(title, size=size)
         except Exception as e:
@@ -337,12 +338,12 @@ def plot():
 
 
 def main():
-    for i in range(len(folderFlag)):
-        ff = folderFlag[i]
-        folder = "./" + ff + "Beta{0}_rs{1}_lambda{2}/".format(int(Beta), rs, Lambda)
+    for i in range(len(folderPre)):
+        ff = folderPre[i]
+        folder = "./" + ff + "MaxOrd{0}_Beta{1}_lambda{2}".format(para[0], para[1], para[3])
         print(folder)
         readData(folder)
-        plt.figure(i)
+        plt.figure(i+1)
         plot()
 
     plt.legend(loc=1, frameon=False, fontsize=size)

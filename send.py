@@ -21,15 +21,20 @@ rootdir = os.getcwd()
 inlist = open(rootdir+"/inlist", "r")
 execute = "feyncalc.exe"
 merge = "merge.py"
-infile = "inlist"
+newinlist = "inlist"
 
 
+paraList = []
 for index, eachline in enumerate(inlist):
     para = eachline.split()
-
+    
     if len(para) == 0:
         print("All submitted!")
         break
+
+    paraList.append("{0}_{1}_{2}".format(para[1], para[2], para[3]))
+
+
 
     # if int(para[-2])==0:
     #     title="freq"
@@ -40,7 +45,7 @@ for index, eachline in enumerate(inlist):
     #     break
 
     homedir = os.getcwd() + \
-        "/" + folderPre + "Beta{0}_rs{1}_lambda{2}".format(para[1], para[2], para[3])
+        "/" + folderPre + "MaxOrd{0}_Beta{1}_lambda{2}".format(para[0], para[1], para[3])
     if os.path.exists(homedir):
         os.system("rm -fr "+homedir)
     os.system("mkdir "+homedir)
@@ -48,7 +53,8 @@ for index, eachline in enumerate(inlist):
     os.system("cp -r groups "+homedir)
     os.system("cp {0} {1}".format(execute, homedir))
     os.system("cp {0} {1}".format(merge, homedir))
-    os.system("cp {0} {1}".format(infile, homedir))
+    with open(homedir+"/"+newinlist, "w") as f:
+        f.write(eachline+"\n")
 
     infilepath = homedir+"/infile"
     if (os.path.exists(infilepath) != True):

@@ -141,10 +141,15 @@ void weight::ChanUST(dse::ver4 &Ver4) {
 
         double InQ = (*LegK0[INL] + *LegK0[INR]).norm();
         if (InQ < 1.0 * Para.Kf) {
-          Ratio = Para.Kf / (*LegK0[INL]).norm();
-          *bubble.LegK[S][INL] = *LegK0[INL] * Ratio;
-          Ratio = Para.Kf / (*LegK0[OUTL]).norm();
-          *bubble.LegK[S][OUTL] = *LegK0[OUTL] * Ratio;
+          momentum InMom = *LegK0[INL] - *LegK0[INR];
+          momentum OutMom = *LegK0[OUTL] - *LegK0[OUTR];
+          Ratio = Para.Kf / InMom.norm();
+          InMom = InMom * Ratio;
+          Ratio = Para.Kf / OutMom.norm();
+          OutMom = OutMom * Ratio;
+
+          *bubble.LegK[S][INL] = InMom;
+          *bubble.LegK[S][OUTL] = OutMom;
           *bubble.LegK[S][INR] = *bubble.LegK[S][INL] * (-1.0);
           *bubble.LegK[S][OUTR] = *bubble.LegK[S][OUTL] * (-1.0);
           bubble.ProjFactor[S] = exp(-InQ * InQ / decayS);

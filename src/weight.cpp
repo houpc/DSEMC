@@ -40,9 +40,10 @@ void weight::Initialization() {
     group.ReWeight = 1.0;
   }
 
-  // vector<dse::channel> Chan = {dse::T, dse::U, dse::S};
+  int num = 4;
+  // dse::channel Chan[num] = {dse::S};
   dse::channel Chan[4] = {dse::I, dse::T, dse::U, dse::S};
-  for (int c = 0; c < 4; c++)
+  for (int c = 0; c < num; c++)
     for (int order = 1; order <= Para.Order; order++) {
       vector<dse::channel> chan = {Chan[c]};
       Ver4Root[order][c] =
