@@ -7,7 +7,6 @@ import glob
 import time
 import numpy as np
 
-
 SleepTime = 10
 
 rs = None
@@ -91,7 +90,7 @@ while True:
 
             for f in files:
                 if re.match(FileName, f):
-                    print "Loading ", f
+                    print("Loading ", f)
                     Norm0 = -1
                     d = None
                     try:
@@ -108,7 +107,7 @@ while True:
                                 AngleBin = np.fromstring(
                                     line3.split(":")[1], sep=' ')
                                 AngleBinSize = len(AngleBin)
-                                print AngleBinSize
+                                print(AngleBinSize)
                             line4 = file.readline()
                             if ExtMomBin is None:
                                 ExtMomBin = np.fromstring(
@@ -131,12 +130,12 @@ while True:
                             DataList.append(AngleIntegation(f, 0))
 
                     # print "Norm", Norm
-
-                    except:
-                        print "fail to load ", folder+f
+                    except Exception as e:
+                        print(e)
+                        print("fail to load ", folder+f)
 
             if Norm > 0 and Data0 is not None:
-                print "Total Weight: ", Data0[0]
+                print("Total Weight: ", Data0[0])
                 Data0 /= Norm
                 try:
                     Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize))
@@ -162,7 +161,7 @@ while True:
                 # print "err", np.std(np.array(DataList))
 
     if len(DataWithAngle) > 0:
-        print "Write Weight file."
+        print("Write Weight file.")
         for chan in Channel:
             with open("./weight/weight{0}.data".format(chan), "w") as file:
                 for angle in range(AngleBinSize):

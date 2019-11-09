@@ -10,23 +10,22 @@ import copy
 mat.rcParams.update({'font.size': 16})
 mat.rcParams["font.family"] = "Times New Roman"
 size = 12
-fdFlagList = ["", "Bare_", "Renorm_", "Renorm_Decay2.5_"]
 
 # XType = "Tau"
 XType = "Mom"
 # XType = "Angle"
-l = 1
-orderAccum = 3
-folderPre = ["Bare_", "Renorm_"]   #[fdFlagList[1], fdFlagList[2]]
+l = 0
+orderAccum = None
+
 # 0: I, 1: T, 2: U, 3: S
 # Channel = [0, 1, 2, 3]
-Channel = [3]
+Channel = [1]
 
 ITUSPlot = False
 SPlot = False
 if len(Channel)==4:
     ITUSPlot = True
-if (len(Channel)==1) and (Channel[0]==3):
+if len(Channel)==1:
     SPlot = True
 
 
@@ -35,33 +34,16 @@ ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 # Order = [0, 1, 2, 3]
 
 
-MaxOrder = None
-rs = None
+Order = None
+kF = None
 Lambda = None
-Beta = None
-TotalStep = None
-BetaStr = None
-rsStr = None
-LambdaStr = None
 AngleBin = None
 ExtMomBin = None
 AngleBinSize = None
 ExtMomBinSize = None
 
 
-with open("inlist", "r") as file:
-    line = file.readline()
-    para = line.split(" ")
-    MaxOrder = int(para[0])
-    BetaStr = para[1]
-    Beta = float(BetaStr)
-    rsStr = para[2]
-    rs = float(rsStr)
-    LambdaStr = para[3]
-    Lambda = float(LambdaStr)
-    TotalStep = float(para[5])
 
-Order = range(0, MaxOrder+1)
 
 
 ##############   2D    ##################################
@@ -72,7 +54,6 @@ Order = range(0, MaxOrder+1)
 # Bubble = 0.0795775  # 2D, Beta=20, rs=1
 
 #############  3D  ######################################
-kF = (9.0*np.pi/4.0)**(1.0/3.0)/rs
 Bubble = 0.0971916  # 3D, Beta=10, rs=1
 
 Data = {}  # key: (order, channel)
@@ -118,13 +99,8 @@ def Mirror(x, y):
 
 
 def readData(folder):
-    global AngleBin
-    global ExtMomBin
-    global AngleBinSize
-    global ExtMomBinSize
-    global Data
-    global DataAccum
-    global DataWithAngle
+    global AngleBin, ExtMomBin, AngleBinSize, ExtMomBinSize
+    global Data, DataAccum, DataWithAngle
 
     for order in Order:
         for chan in Channel:
@@ -164,6 +140,7 @@ def readData(folder):
                         Data0 = d
                     else:
                         Data0 += d
+            # print(order, chan,Norm, Data0)
             Data0 /= Norm
             Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize))
 
@@ -175,7 +152,7 @@ def readData(folder):
     DataAccum = copy.deepcopy(Data)
     for order in range(2, orderAccum+1):
         for chan in Channel:
-            DataAccum[(order, chan)] = DataAccum[(order-1, chan)]+Data[(order, chan)]      
+            DataAccum[(order, chan)] = DataAccum[(order-1, chan)]+Data[(order, chan)]     
 
 
 
@@ -186,7 +163,7 @@ def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):
 
 
 
-def plot():
+def plot(folder):
     w = 1-0.429
 
     if SPlot:
@@ -217,7 +194,8 @@ def plot():
             for order in Order[1:]:
                 i += 1
                 if(chan == 1):
-                    qData -= Data[(order, chan)]
+                    # qData -= Data[(order, chan)]
+                    qData = Data[(order, chan)]
                 else:
                     qData = Data[(order, chan)]
 
@@ -226,7 +204,8 @@ def plot():
                             ColorList[order], MarkerList[chan], "Loop {0}, Chan {1}".format(order, ChanName[chan]))
                     ErrorPlot(dx, ExtMomBin, DataAccum[(order, chan)],
                             ColorList[order], MarkerList[chan], "Loop {0}, Chan {1}".format(order, ChanName[chan]))
-                    print("order:{0}, Gamma4:{1}".format(order,qData[0]))
+                    print("order:{0},Chan {1}, Gamma4:{2}".format(order, ChanName[chan], DataAccum[(order, chan)][0]))
+                     
                     cx.set_xlabel("$q/k_F$", size=size)
                     cx.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
                     cx.set_title("$\Gamma_4$ with order", size=size)
@@ -237,8 +216,8 @@ def plot():
         for chan in Channel:
             if(chan == 1):
                 qData = 8.0*np.pi/(ExtMomBin**2*kF**2+Lambda)
-                # qData *= 0.0
-                qData -= DataAccum[(orderAccum, chan)]
+                # qData -= DataAccum[(orderAccum, chan)]
+                qData = DataAccum[(orderAccum, chan)]
             else:
                 qData = DataAccum[(orderAccum, chan)]
 
@@ -256,13 +235,9 @@ def plot():
         ax.set_xlim([0.0, ExtMomBin[-1]])
         ax.set_xlabel("$q/k_F$", size=size)
         ax.set_ylabel("$-\Gamma_4(\omega=0, q)$", size=size)
-        try:
-            title = folderPre.replace("_", " ")
-            title = "".join([i for i in title if not i.isdigit()]) + "Interaction"
-            plt.suptitle(title, size=size)
-        except Exception as e:
-            pass
-        
+        title = folder.replace("_", "  ").replace("/", "").replace(".", "")
+        plt.suptitle(title, size=size)
+
 
         x = np.arange(0, 3.0, 0.001)
         y = x*0.0+Bubble
@@ -322,32 +297,76 @@ def plot():
         ax.set_xlim([-np.arccos(AngleBin[0]), np.arccos(AngleBin[0])])
         # ax.set_ylim([0.0, 5.0])
         ax.set_xlabel("$Angle$", size=size)
-    # ax.set_xticks([0.0,0.04,0.08,0.12])
-    # ax.set_yticks([0.35,0.4,0.45,0.5])
-    # ax.set_ylim([-0.02, 0.125])
-    # ax.set_ylim([0.07, 0.125])
-    # ax.xaxis.set_label_coords(0.97, -0.01)
-    # # ax.yaxis.set_label_coords(0.97, -0.01)
-    # ax.text(-0.012,0.52, "$-I$", fontsize=size)
+    plt.legend(loc=1, frameon=False, fontsize=size)
+    plt.tight_layout()
 
-
-
-    # ax.text(0.02,0.47, "$\\sim {\\frac{1}{2}-}\\frac{1}{2} {\\left( \\frac{r}{L} \\right)} ^{2-s}$", fontsize=28)
 
     
+def getFileName(pre, para):
+    return "./" + pre + "Order{0}_Beta{1}_lambda{2}/".format(para[0], para[1], para[3])
 
 
 def main():
-    for i in range(len(folderPre)):
-        ff = folderPre[i]
-        folder = "./" + ff + "Order{0}_Beta{1}_lambda{2}".format(para[0], para[1], para[3])
-        print(folder)
-        readData(folder)
-        plt.figure(i+1)
-        plot()
+    global Order, orderAccum, Lambda, kF
 
-    plt.legend(loc=1, frameon=False, fontsize=size)
-    plt.tight_layout()
+    figNum = 0
+    folderPre = ["Bare_", "Renorm_"]
+
+    if len(sys.argv) == 1:
+        with open("inlist", "r") as file:
+            lines = file.readlines()
+        for line in lines:
+            if len(line) < 2:
+                break
+            para = line.split(" ")
+            MaxOrder = int(para[0])
+            BetaStr = para[1]
+            Beta = float(BetaStr)
+            rsStr = para[2]
+            rs = float(rsStr)
+            LambdaStr = para[3]
+            Lambda = float(LambdaStr)
+            TotalStep = float(para[5])
+
+            kF = (9.0*np.pi/4.0)**(1.0/3.0)/rs
+            Order = range(0, MaxOrder+1)
+            orderAccum = MaxOrder
+
+            folders = [getFileName(p, para) for p in folderPre]
+
+            for folder in folders:
+                figNum += 1
+                print(folder)
+                readData(folder)
+                plt.figure(figNum)
+                plot(folder)
+
+    elif len(sys.argv) > 1:
+        folders = sys.argv[1:]
+        for folder in folders:
+            inlistf = os.path.join(folder, "inlist")
+            with open(inlistf, "r") as file:
+                line = file.readline()
+            para = line.split(" ")
+            MaxOrder = int(para[0])
+            BetaStr = para[1]
+            Beta = float(BetaStr)
+            rsStr = para[2]
+            rs = float(rsStr)
+            LambdaStr = para[3]
+            Lambda = float(LambdaStr)
+            TotalStep = float(para[5])
+
+            kF = (9.0*np.pi/4.0)**(1.0/3.0)/rs
+            Order = range(0, MaxOrder+1)
+            orderAccum = MaxOrder
+
+            figNum += 1
+            print(folder)
+            readData(folder)
+            plt.figure(figNum)
+            plot(folder)
+
     plt.show()
 
 

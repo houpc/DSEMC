@@ -25,7 +25,7 @@ int AddToTList(vector<array<int, 4>> &TList, const array<int, 4> T) {
 
 momentum *verDiag::NextMom() {
   MomNum += 1;
-  ASSERT_ALLWAYS(MomNum < MaxMomNum, "Too many momentum variables! " << MomNum);
+  ASSERT_ALLWAYS(MomNum < MaxMomNum, "Too many momentum variables! " <<MaxMomNum << " "<< MomNum);
   return &(*LoopMom)[MomNum - 1];
 }
 
@@ -73,6 +73,8 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
   vector<channel> UST;
   vector<channel> II;
   for (auto &chan : Channel) {
+    // if (OnlySDiag && (chan == T || chan == U))
+    //     continue;
     if (chan == I)
       II.push_back(chan);
     else
@@ -84,6 +86,7 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
     Ver4 = Ver0(Ver4, InTL);
   } else {
     // normal diagram
+    // if (!OnlySDiag)
     Ver4 = ChanI(Ver4, II, InTL, LoopNum, LoopIndex, false);
     Ver4 = ChanUST(Ver4, UST, InTL, LoopNum, LoopIndex, false);
 
@@ -99,6 +102,7 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
           //                "Right vertex should contain one I channel!");
           // ASSERT_ALLWAYS(UST.size() == 3,
           //                "Right vertex should contain one U, S, T channels!");
+          // if (!OnlySDiag)
           Ver4 = ChanI(Ver4, II, InTL, LoopNum, LoopIndex, true);
           Ver4 = ChanUST(Ver4, UST, InTL, LoopNum, LoopIndex, true);
         }
@@ -107,6 +111,7 @@ ver4 verDiag::Vertex(array<momentum *, 4> LegK, int InTL, int LoopNum,
         if (Ver4.RexpandBare) 
         {
           // counter diagrams if the vertex is on the left
+          // if (!OnlySDiag)
           Ver4 = ChanI(Ver4, {I}, InTL, LoopNum, LoopIndex, true);
           Ver4 = ChanUST(Ver4, {T, U, S}, InTL, LoopNum, LoopIndex, true);
         }
@@ -251,8 +256,8 @@ ver4 verDiag::ChanUST(ver4 Ver4, vector<channel> Channel, int InTL, int LoopNum,
       // if (ol == 1 && c == T && LoopNum == 2)
       //   continue;
 
-      // if (IsProjected && c == S)
-      //   continue;
+      if (OnlySDiag && (c == T || c == U))
+        continue;
 
       pair Pair;
       Pair.Channel = c;

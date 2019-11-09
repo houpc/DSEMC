@@ -10,61 +10,40 @@ import copy
 mat.rcParams.update({'font.size': 16})
 mat.rcParams["font.family"] = "Times New Roman"
 size = 12
-fdFlagList = ["", "Bare_", "Renorm_", "Renorm_Decay2.5_"]
 
 # XType = "Tau"
 XType = "Mom"
 # XType = "Angle"
-l = 1
-orderAccum = 3
-folderPre = ["Bare_", "Renorm_"]   #[fdFlagList[1], fdFlagList[2]]
+l = 0
+orderAccum = None
+
 # 0: I, 1: T, 2: U, 3: S
 # Channel = [0, 1, 2, 3]
-Channel = [3]
+Channel = [1]
 
 ITUSPlot = False
 SPlot = False
 if len(Channel)==4:
     ITUSPlot = True
-if (len(Channel)==1) and (Channel[0]==3):
+if len(Channel)==1:
     SPlot = True
 
-
-MarkerList = ['s','o','v','d','x','^','<','>','*','2','3','4','H','+','D', '.', ',']
-ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy', 'y','lime','fuchsia', 'aqua','sandybrown','slategrey']
 
 ChanName = {0: "I", 1: "T", 2: "U", 3: "S"}
 # 0: total, 1: order 1, ...
 # Order = [0, 1, 2, 3]
 
 
-MaxOrder = None
-rs = None
+Order = None
+kF = None
 Lambda = None
-Beta = None
-TotalStep = None
-BetaStr = None
-rsStr = None
-LambdaStr = None
 AngleBin = None
 ExtMomBin = None
 AngleBinSize = None
 ExtMomBinSize = None
 
 
-with open("inlist", "r") as file:
-    line = file.readline()
-    para = line.split(" ")
-    MaxOrder = int(para[0])
-    BetaStr = para[1]
-    Beta = float(BetaStr)
-    rsStr = para[2]
-    rs = float(rsStr)
-    LambdaStr = para[3]
-    Lambda = float(LambdaStr)
-    TotalStep = float(para[5])
 
-Order = range(0, MaxOrder+1)
 
 
 ##############   2D    ##################################
@@ -75,7 +54,6 @@ Order = range(0, MaxOrder+1)
 # Bubble = 0.0795775  # 2D, Beta=20, rs=1
 
 #############  3D  ######################################
-kF = (9.0*np.pi/4.0)**(1.0/3.0)/rs
 Bubble = 0.0971916  # 3D, Beta=10, rs=1
 
 Data = {}  # key: (order, channel)
@@ -121,13 +99,8 @@ def Mirror(x, y):
 
 
 def readData(folder):
-    global AngleBin
-    global ExtMomBin
-    global AngleBinSize
-    global ExtMomBinSize
-    global Data
-    global DataAccum
-    global DataWithAngle
+    global AngleBin, ExtMomBin, AngleBinSize, ExtMomBinSize
+    global Data, DataAccum, DataWithAngle
 
     for order in Order:
         for chan in Channel:
@@ -167,6 +140,7 @@ def readData(folder):
                         Data0 = d
                     else:
                         Data0 += d
+            # print(order, chan,Norm, Data0)
             Data0 /= Norm
             Data0 = Data0.reshape((AngleBinSize, ExtMomBinSize))
 
@@ -181,31 +155,92 @@ def readData(folder):
             DataAccum[(order, chan)] = DataAccum[(order-1, chan)]+Data[(order, chan)]      
 
 
-
-
 def ErrorPlot(p, x, d, color, marker, label=None, size=4, shift=False):
     p.plot(x, d, marker=marker, c=color, label=label,
            lw=1, markeredgecolor="None", linestyle="--", markersize=size)
 
+    
+def getFileName(pre, para):
+    return "./" + pre + "Order{0}_Beta{1}_lambda{2}/".format(para[0], para[1], para[3])
 
 
 def main():
+    global Order, orderAccum, Lambda, kF
+    MarkerList = ['s','o','v','d','x','^','<','>','*','2','3','4','H','+','D', '.', ',']
+    ColorList = ['k', 'r', 'b', 'g', 'm', 'c', 'navy', 'y','lime','fuchsia', 'aqua','sandybrown','slategrey']
+
+    figNum = 0
+    folderPre = ["Bare_", "Renorm_"]
+
+
     ax = plt.subplot(1,1,1)
-    orderList = [1, 2, 3]
-    for i in range(len(folderPre)):
-        ff = folderPre[i]
-        folder = "./" + ff + "Order{0}_Beta{1}_lambda{2}".format(para[0], para[1], para[3])
-        print(folder)
-        readData(folder)
-        res = [DataAccum[o,Channel[0]][0] for o in range(1,4)]
-        ErrorPlot(ax, orderList, res, ColorList[i], MarkerList[i], ff)
+    if len(sys.argv) == 1:
+        with open("inlist", "r") as file:
+            lines = file.readlines()
+        for line in lines:
+            if len(line) < 2:
+                break
+            para = line.split(" ")
+            MaxOrder = int(para[0])
+            BetaStr = para[1]
+            Beta = float(BetaStr)
+            rsStr = para[2]
+            rs = float(rsStr)
+            LambdaStr = para[3]
+            Lambda = float(LambdaStr)
+            TotalStep = float(para[5])
+
+            kF = (9.0*np.pi/4.0)**(1.0/3.0)/rs
+            Order = range(0, MaxOrder+1)
+            orderAccum = MaxOrder
+            orderList = [i for i in range(1, MaxOrder+1)]
+
+            folders = [getFileName(fp, para) for fp in folderPre]
+            for folder in folders:
+                title = "Bare" if "bare" in folder.lower() else "Renorm"
+                figNum += 1
+                print(folder)
+                readData(folder)
+                res = [DataAccum[(o,Channel[0])][0] for o in range(1,MaxOrder+1)]
+                ErrorPlot(ax, orderList, res,
+                    ColorList[figNum], MarkerList[figNum], title)
 
 
+    elif len(sys.argv) > 1:
+        folders = sys.argv[1:]
+        for folder in folders:
+            title = "Bare" if "bare" in folder.lower() else "Renorm"
+            inlistf = os.path.join(folder, "inlist")
+            with open(inlistf, "r") as file:
+                line = file.readline()
+            para = line.split(" ")
+            MaxOrder = int(para[0])
+            BetaStr = para[1]
+            Beta = float(BetaStr)
+            rsStr = para[2]
+            rs = float(rsStr)
+            LambdaStr = para[3]
+            Lambda = float(LambdaStr)
+            TotalStep = float(para[5])
+
+            kF = (9.0*np.pi/4.0)**(1.0/3.0)/rs
+            Order = range(0, MaxOrder+1)
+            orderAccum = MaxOrder
+            orderList = [i for i in range(1, MaxOrder+1)]
+
+            figNum += 1
+            print(folder)
+            readData(folder)
+            res = [DataAccum[(o,Channel[0])][0] for o in range(1,MaxOrder+1)]
+            ErrorPlot(ax, orderList, res,
+                    ColorList[figNum], MarkerList[figNum], title)
+
+            
+    ax.set_xlabel("order")
+    ax.set_ylabel("$\Gamma_4(q=0)$")
     plt.legend(loc=1, frameon=False, fontsize=size)
     plt.tight_layout()
     plt.show()
-
-
 
 
 

@@ -2,10 +2,15 @@
 import random
 import os
 import sys
+import socket
 
 ##### Modify parameters here  ###############
-# Cluster="PBS"
-Cluster = "local"
+hostname = socket.gethostname()
+servers = ['einstein', 'server', 'R630']
+if(hostname in servers):
+    Cluster = "PBS"
+else:
+    Cluster = "local"
 # Cluster="condor"
 
 ############################################
@@ -131,7 +136,7 @@ for index, eachline in enumerate(inlist):
     
     os.chdir(homedir)
     if "bare" not in folderPre.lower():
-        os.system("./" + merge + " > weight.log &")
+        os.system("python ./" + merge + " > weight.log &")
     os.chdir("..")
         
 print("Jobs manage daemon is ended")

@@ -42,14 +42,17 @@ void weight::Initialization() {
 
   int num = 4;
   // dse::channel Chan[num] = {dse::S};
-  dse::channel Chan[4] = {dse::I, dse::T, dse::U, dse::S};
-  for (int c = 0; c < num; c++)
+  dse::channel Chan[num] = {dse::I, dse::T, dse::U, dse::S};
+  for (int c = 0; c < num; c++) {
+    if (OnlySDiag && (Chan[c] == dse::T || Chan[c] == dse::U))
+      continue;
     for (int order = 1; order <= Para.Order; order++) {
       vector<dse::channel> chan = {Chan[c]};
       Ver4Root[order][c] =
           VerDiag.Build(Var.LoopMom, order, chan, dse::caltype::PARQUET);
       LOG_INFO(VerDiag.ToString(Ver4Root[order][c]));
     }
+  }
   
   // exit(0);
 
