@@ -6,8 +6,8 @@ import socket
 
 ##### Modify parameters here  ###############
 hostname = socket.gethostname()
-servers = ['einstein','server','R630']
-if (hostname in servers):
+servers = ['einstein', 'server', 'R630']
+if(hostname in servers):
     Cluster = "PBS"
 else:
     Cluster = "local"
@@ -18,26 +18,26 @@ print("Cluster: {0}".format(Cluster))
 
 if len(sys.argv) == 1:
     folderPre = ""
-    execute = "feyncalc.exe"
 elif len(sys.argv) >= 2:
-    folderPre = "_".join(sys.argv[1:])+"_"
-    execute = "feyncalc_"+folderPre[:-1]+".exe"
+    folderPre = "_".join(sys.argv[1:]) + "_"
 
 
 rootdir = os.getcwd()
 inlist = open(rootdir+"/inlist", "r")
+execute = "feyncalc.exe"
 merge = "merge.py"
-infile = "inlist"
+newinlist = "inlist"
 
-lines = inlist.readlines()
-inlist.close()
-for eachline in lines:
+
+paraList = []
+for index, eachline in enumerate(inlist):
     os.chdir(rootdir)
     para = eachline.split()
-
+    
     if len(para) == 0:
         print("All submitted!")
         break
+
 
     # if int(para[-2])==0:
     #     title="freq"
@@ -48,7 +48,15 @@ for eachline in lines:
     #     break
 
     homedir = os.getcwd() + \
-        "/"+folderPre+"Order{0}_Beta{1}_lambda{2}".format(para[0],para[1],para[3])
+        "/" + folderPre + "Order{0}_Beta{1}_lambda{2}".format(para[0], para[1], para[3])
+    paraName = "{0}_{1}_{2}".format(para[0], para[1], para[3])
+    if paraName in paraList:
+        homedir = os.getcwd() + \
+            "/" + folderPre + "Order{0}_Beta{1}_rs{2}_lambda{3}_Step{4}".format(
+            para[0],para[1],para[2],para[3],para[5])
+    paraList.append(paraName)
+
+    # continue
     if os.path.exists(homedir):
         os.system("rm -fr "+homedir)
     os.system("mkdir "+homedir)
@@ -56,10 +64,8 @@ for eachline in lines:
     os.system("cp -r groups "+homedir)
     os.system("cp {0} {1}".format(execute, homedir))
     os.system("cp {0} {1}".format(merge, homedir))
-#    os.system("cp {0} {1}".format(infile, homedir))
-    inf = open(homedir+"/"+infile, "w")
-    inf.write(eachline+"\n"+lines[-1])
-    inf.close()
+    with open(homedir+"/"+newinlist, "w") as f:
+        f.write(eachline+"\n")
 
     infilepath = homedir+"/infile"
     if (os.path.exists(infilepath) != True):
@@ -77,8 +83,8 @@ for eachline in lines:
     for pid in range(int(para[-1])):
 
         ########## Generate input files ################
-        infile_pid = "_in"+str(pid)
-        f = open(infilepath+"/"+infile_pid, "w")
+        infile = "_in"+str(pid)
+        f = open(infilepath+"/"+infile, "w")
         item = para[0:-1]
         item.append(str(-int(random.random()*1000000)))
         item.append(str(pid))
@@ -94,12 +100,13 @@ for eachline in lines:
         if Cluster == "local":
             os.chdir(homedir)
             os.system("./"+execute+" < "+infilepath+"/" +
-                      infile_pid+" > "+outfilepath+"/"+outfile+" &")
+                      infile+" > "+outfilepath+"/"+outfile+" &")
+            os.chdir("..")
 
         elif Cluster == "condor":
             with open(jobfilepath+"/"+jobfile, "w") as fjob:
                 fjob.write("executable = {0}\n".format(execute))
-                fjob.write("input ={0}/{1}\n".format(infilepath, infile_pid))
+                fjob.write("input ={0}/{1}\n".format(infilepath, infile))
                 fjob.write("output ={0}/{1}\n".format(outfilepath, outfile))
                 fjob.write("initialdir ={0}\n".format(homedir))
                 fjob.write("queue")
@@ -107,6 +114,7 @@ for eachline in lines:
             os.chdir(homedir)
             os.system("condor_submit {0}/{1}".format(jobfilepath, jobfile))
             os.system("rm "+jobfilepath + "/"+jobfile)
+            os.chdir("..")
         elif Cluster == "PBS":
             with open(jobfilepath+"/"+jobfile, "w") as fjob:
                 fjob.write("#!/bin/sh\n"+"#PBS -N "+jobfile+"\n")
@@ -116,18 +124,20 @@ for eachline in lines:
                 fjob.write("echo $PBS_JOBID >>"+homedir+"/id_job.log\n")
                 fjob.write("cd "+homedir+"\n")
                 fjob.write("./"+execute+" < "+infilepath+"/" +
-                           infile_pid+" > "+outfilepath+"/"+outfile)
+                           infile+" > "+outfilepath+"/"+outfile)
 
             os.chdir(homedir)
             os.system("qsub "+jobfilepath + "/"+jobfile)
             os.system("rm "+jobfilepath + "/"+jobfile)
+            os.chdir("..")
         else:
             print("I don't know what is {0}".format(Cluster))
             break
-
+    
     os.chdir(homedir)
     if "bare" not in folderPre.lower():
-        os.system("./" + merge + " > weight.log &")
-
+        os.system("python ./" + merge + " > weight.log &")
+    os.chdir("..")
+        
 print("Jobs manage daemon is ended")
 sys.exit(0)
